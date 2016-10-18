@@ -121,7 +121,7 @@ reset = "onEqualManipulationSet"
 #reset = "Never"
 
 ## how many branches to expand 
-numForEachDist = 1
+numOfPointsAfterEachFeature = 1
 
 # impose bounds on the input or not
 boundRestriction = True
@@ -137,9 +137,6 @@ timeout = 600
 #   which need to confirm whether they are useful
 #
 ################################################################
-
-# the cut-off precision
-precision = 1e-6
 
 # the rate of changing the activations
 # a parameter for the heuristics

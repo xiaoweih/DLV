@@ -60,8 +60,8 @@ class searchTree:
         return (copy.deepcopy(self.images[index]),self.cls[index],self.gls[index],self.cps[index],self.mfns[index])
 
     def getHowFar(self,pi,n):
-        #if pi >= (numForEachDist ** n): 
-        #    return self.getHowFar(pi-(numForEachDist ** n), n+1) 
+        #if pi >= (numOfPointsAfterEachFeature ** n): 
+        #    return self.getHowFar(pi-(numOfPointsAfterEachFeature ** n), n+1) 
         #else: return n
         return pi
                 

@@ -110,9 +110,9 @@ def handleOne(model,dataset,dc,statisticsFile,maxilayer,startIndex):
 
             # for every layer
             f = 0 
-            if numForEachDist == 1: 
+            if numOfPointsAfterEachFeature == 1: 
                 testNum = numOfFeatures
-            else: testNum = (numForEachDist ** (n+1)) / (numForEachDist - 1)
+            else: testNum = (numOfPointsAfterEachFeature ** (n+1)) / (numOfPointsAfterEachFeature - 1)
             while f <= testNum: 
 
                 f += 1
@@ -168,8 +168,8 @@ def handleOne(model,dataset,dc,statisticsFile,maxilayer,startIndex):
 
                         print "4) add new images ..."
                         random.seed(time.time())
-                        if len(rk) > numForEachDist: 
-                            rk = random.sample(rk, numForEachDist)
+                        if len(rk) > numOfPointsAfterEachFeature: 
+                            rk = random.sample(rk, numOfPointsAfterEachFeature)
                         diffs = diffImage(image0,rk[0])
                         print("the dimensions of the images that are changed in the previous round: %s"%diffs)
                         if len(diffs) == 0: st.clearManipulated(k)
