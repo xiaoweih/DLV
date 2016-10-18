@@ -16,7 +16,8 @@ def usual_configuration(dataset):
         maxilayer = 2
 
         ## number of features of each layer 
-        numOfDist = 0
+        # in the paper, dims_L = numOfFeatures * featureDims
+        numOfFeatures = 0
 
         # use linear restrictions or conv filter restriction
         feedback = "point"
@@ -48,7 +49,7 @@ def usual_configuration(dataset):
         # compute the derivatives up to a specific layer
         derivativelayerUpTo = 3
 
-        return (startIndex,maxilayer,numOfDist,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
+        return (startIndex,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
         
     elif dataset == "mnist": 
 
@@ -60,7 +61,7 @@ def usual_configuration(dataset):
         maxilayer = 0
 
         ## number of features of each layer 
-        numOfDist = 1000
+        numOfFeatures = 1000
 
         # use linear restrictions or conv filter restriction
         feedback = "point"
@@ -92,7 +93,7 @@ def usual_configuration(dataset):
         # compute the derivatives up to a specific layer
         derivativelayerUpTo = 3
     
-        return (startIndex,maxilayer,numOfDist,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
+        return (startIndex,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
         
     elif dataset == "cifar10": 
     
@@ -104,7 +105,7 @@ def usual_configuration(dataset):
         maxilayer = 0
 
         ## number of features of each layer 
-        numOfDist = 1000
+        numOfFeatures = 1000
 
         # use linear restrictions or conv filter restriction
         feedback = "point"
@@ -136,7 +137,7 @@ def usual_configuration(dataset):
         # compute the derivatives up to a specific layer
         derivativelayerUpTo = 5
     
-        return (startIndex,maxilayer,numOfDist,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
+        return (startIndex,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
 
     elif dataset == "imageNet": 
     
@@ -148,7 +149,7 @@ def usual_configuration(dataset):
         maxilayer = 1
 
         ## number of features of each layer 
-        numOfDist = 20000
+        numOfFeatures = 20000
 
         # use linear restrictions or conv filter restriction
         feedback = "point"
@@ -182,4 +183,4 @@ def usual_configuration(dataset):
         # compute the derivatives up to a specific layer
         derivativelayerUpTo = 5
     
-        return (startIndex,maxilayer,numOfDist,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
+        return (startIndex,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)

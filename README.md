@@ -1,7 +1,7 @@
 # DLV
 
 
-Note: the project is currently under active development. Please feel free to contact the developer. 
+Note: the project is currently under active development. Please feel free to contact the developer by email: xiaowei.huang@cs.ox.ac.uk. 
 
 (1) Installation: 
 
@@ -23,7 +23,7 @@ Use the following command to call the program:
 
            python main.py
 
-To run program for imageNet properly, one needs to include the directories 'caffe_ilsvrc12' and 'ImageNet_Utils' into scripts/networks/imageNet/ directory. Otherwise, the program cannot find images to process. 
+Please use the file ''configuration.py'' to set the parameters for the system to run. More instructions on how to adapt the parameters will come soon. 
 
-Please use the file ''configuration.py'' to set the parameters for the system to run. More instructions on how to adapt the parameters will come later. 
 
+Xiaowei Huang

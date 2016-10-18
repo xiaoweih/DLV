@@ -35,36 +35,36 @@ def initialiseRegionActivation(model,manipulated,image):
         ngl = {}
         if len(image.shape) == 2: 
             # decide how many elements in the input will be considered
-            if len(image)*len(image[0])  < n0 : 
+            if len(image)*len(image[0])  < featureDims : 
                 mfn = len(image)*len(image[0]) 
-            else: mfn = n0
+            else: mfn = featureDims
             # get those elements with maximal/minimum values
             ls = getTop2DActivation(image,manipulated,[],mfn,-1)
 
         elif len(image.shape) == 3:
             # decide how many elements in the input will be considered
-            if len(image)*len(image[0])*len(image[0][0])  < n0 : 
+            if len(image)*len(image[0])*len(image[0][0])  < featureDims : 
                 mfn = len(image)*len(image[0])*len(image[0][0])
-            else: mfn = n0
+            else: mfn = featureDims
             # get those elements with maximal/minimum values
             ls = getTop3DActivation(image,manipulated,[],mfn,-1)     
                 
         for i in ls: 
-            ncl[i] = cl0
-            ngl[i] = gl0
+            ncl[i] = span
+            ngl[i] = numSpan
 
     elif layerType == "InputLayer":
         ncl = {}
         ngl = {}
         # decide how many elements in the input will be considered
-        if len(image)  < n0 : 
+        if len(image)  < featureDims : 
             mfn = len(image) 
-        else: mfn = n0
+        else: mfn = featureDims
         # get those elements with maximal/minimum values
         ls = getTopActivation(image,manipulated,-1,mfn)
         for i in ls: 
-            ncl[i] = cl0
-            ngl[i] = gl0
+            ncl[i] = span
+            ngl[i] = numSpan
             
     elif layerType == "ZeroPadding2D": 
         #image1 = addZeroPadding2D(image)
@@ -73,22 +73,22 @@ def initialiseRegionActivation(model,manipulated,image):
         ngl = {}
         if len(image1.shape) == 2: 
             # decide how many elements in the input will be considered
-            if len(image1)*len(image1[0])  < n0 : 
+            if len(image1)*len(image1[0])  < featureDims : 
                 mfn = len(image1)*len(image1[0]) 
-            else: mfn = n0
+            else: mfn = featureDims
             # get those elements with maximal/minimum values
             ls = getTop2DActivation(image1,manipulated,[],mfn,-1)
 
         elif len(image1.shape) == 3:
             # decide how many elements in the input will be considered
-            if len(image1)*len(image1[0])*len(image1[0][0])  < n0 : 
+            if len(image1)*len(image1[0])*len(image1[0][0])  < featureDims : 
                 mfn = len(image1)*len(image1[0])*len(image1[0][0])
-            else: mfn = n0
+            else: mfn = featureDims
             # get those elements with maximal/minimum values
             ls = getTop3DActivation(image1,manipulated,[],mfn,-1)         
         for i in ls: 
-            ncl[i] = cl0
-            ngl[i] = gl0
+            ncl[i] = span
+            ngl[i] = numSpan
         
     else: 
         print "initialiseRegionActivation: Unknown layer type ... "

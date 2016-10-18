@@ -83,14 +83,14 @@ def dense_adversarial_solve(nfeatures,nfilters,filters,bias,input,activations):
             deactivateStr2 = str(activations[k]) +" - "
             deactivateStr2 += "variable[1,1,"+ str (k+1) + "] < " + str(abs(maxdist))+ "/ " + str(changeSpeed)
             dst2 = eval(deactivateStr2)
-            dst3 = eval("variable[1,1,"+ str (k+1) + "] < " + str(activations[k]-cp0))
+            dst3 = eval("variable[1,1,"+ str (k+1) + "] < " + str(activations[k]-precision))
             dst = And(dst1, And(dst2, dst3))
                     
             ast1 = eval("variable[1,1,"+ str (k+1)  + "] >= " + str(activations[k]))
             activateStr = "variable[1,1,"+ str (k+1)  + "] - "
             activateStr += str(activations[k]) +" < " + str(abs(maxdist))+ "/ " + str(changeSpeed) 
             ast2 = eval(activateStr)
-            ast3 = eval("variable[1,1,"+ str (k+1) + "] > " + str(activations[k]+cp0))
+            ast3 = eval("variable[1,1,"+ str (k+1) + "] > " + str(activations[k]+precision))
             ast = And(ast1, And(ast2, ast3))
 
             if approach == 1: s.add(dst)

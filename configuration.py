@@ -27,32 +27,30 @@ task = "safety_check"
 
 # which dataset to work with
 #dataset = "regression"
-#dataset = "mnist"
-dataset = "cifar10"
+dataset = "mnist"
+#dataset = "cifar10"
 #dataset = "imageNet"
 
 # decide whether to take a usual configuration
 # for specific dataset
-#take_usual_config = True
-take_usual_config = False
+take_usual_config = True
+#take_usual_config = False
 
 # the network is trained from scratch
 #  or read from the saved files
 whichMode = "read"
 #whichMode = "train"
 
-# work with a single image 
-#  or a batch of images 
+# work with a single image or a batch of images 
 dataProcessing = "single"
 #dataProcessing = "batch"
 dataProcessingBatchNum = 200
 
-# ce: the region definition for layer 0, i.e., e_0
-n0 = 5
-cl0 = 255/float(255)
-gl0 = 0.5
-# cp : current precision, i.e., p_k
-cp0 = 255/float(255)
+
+span = 255/float(255)   # s_p in the paper
+numSpan = 0.5           # m_p in the paper
+precision = 255/float(255)   # \varepsilon in the paper
+featureDims = 5         # dims_{k,f} in the paper
 
 
 #######################################################
@@ -70,7 +68,8 @@ startIndex = 197
 maxilayer = 0
 
 ## number of features of each layer 
-numOfDist = 40
+# in the paper, dims_L = numOfFeatures * featureDims
+numOfFeatures = 40
 
 # use linear restrictions or conv filter restriction
 feedback = "point"
@@ -108,7 +107,7 @@ errorBounds[-1] = 1.0
 derivativelayerUpTo = 3
 
 if take_usual_config == True: 
-    (startIndex,maxilayer,numOfDist,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile) = usual_configuration(dataset)
+    (startIndex,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile) = usual_configuration(dataset)
 
 ############################################################
 #
@@ -219,4 +218,4 @@ def nprint(str):
 #
 #######################################################
 
-(n0,cl0,gl0,cp0,bound,NN,dataBasics,directory_model_string,directory_statistics_string,directory_pic_string,filterSize) = network_parameters(dataset)
+(featureDims,span,numSpan,precision,bound,NN,dataBasics,directory_model_string,directory_statistics_string,directory_pic_string,filterSize) = network_parameters(dataset)

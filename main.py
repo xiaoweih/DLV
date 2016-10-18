@@ -48,14 +48,14 @@ def main():
                 #handleOne(model,dataset,statisticsFile,maxilayer,whichIndex)
                 #feedback = copy.deepcopy(feedbackTemp)
             elif task == "adversary_generation":  
-                adversarial_analysis(model,dataset,maxilayer,startIndex,cl0,gl0,cp0)
+                adversarial_analysis(model,dataset,maxilayer,startIndex,span,numSpan,precision)
     # handle a single input
     else: 
         print "\n\nprocessing input of index %s in the dataset: " %(str(startIndex))
         if task == "safety_check": 
             handleOne(model,dataset,dc,statisticsFile,maxilayer,startIndex)
         elif task == "adversary_generation":   
-            adversarial_analysis(model,dataset,maxilayer,startIndex,cl0,gl0,cp0)
+            adversarial_analysis(model,dataset,maxilayer,startIndex,span,numSpan,precision)
 
     statisticsFile.close()
     dc.summarise()
@@ -111,7 +111,7 @@ def handleOne(model,dataset,dc,statisticsFile,maxilayer,startIndex):
             # for every layer
             f = 0 
             if numForEachDist == 1: 
-                testNum = numOfDist
+                testNum = numOfFeatures
             else: testNum = (numForEachDist ** (n+1)) / (numForEachDist - 1)
             while f <= testNum: 
 

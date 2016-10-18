@@ -52,11 +52,11 @@ def network_parameters(dataset):
         directory_pic_string = makedirectory("data/mnist_pic")
         
 # ce: the region definition for layer 0, i.e., e_0
-        n0 = 2
-        cl0 = 255/float(255)
-        gl0 = 1
+        featureDims = 2
+        span = 255/float(255)
+        numSpan = 1
 # cp : current precision, i.e., p_k
-        cp0 = 255/float(255)
+        precision = 255/float(255)
     
     elif dataset == "regression": 
         NN = NN_regression
@@ -66,11 +66,11 @@ def network_parameters(dataset):
         directory_pic_string = makedirectory("data/regression_pic")
 
 # ce: the region definition for layer 0, i.e., e_0
-        n0 = 5
-        cl0 = 255/float(255)
-        gl0 = 1
+        featureDims = 5
+        span = 255/float(255)
+        numSpan = 1
 # cp : current precision, i.e., p_k
-        cp0 = 255/float(255)
+        precision = 255/float(255)
 
     elif dataset == "cifar10": 
         NN = NN_cifar10
@@ -80,11 +80,11 @@ def network_parameters(dataset):
         directory_pic_string = makedirectory("data/cifar10_pic")
  
 # ce: the region definition for layer 0, i.e., e_0
-        n0 = 5
-        cl0 = 255/float(255)
-        gl0 = 1
+        featureDims = 5
+        span = 255/float(255)
+        numSpan = 1
 # cp : current precision, i.e., p_k
-        cp0 = 255/float(255)
+        precision = 255/float(255)
                 
     elif dataset == "imageNet": 
         NN = NN_imageNet
@@ -94,11 +94,11 @@ def network_parameters(dataset):
         directory_pic_string = makedirectory("data/imageNet_pic")
 
 # ce: the region definition for layer 0, i.e., e_0
-        n0 = 5
-        cl0 = 125
-        gl0 = 1
+        featureDims = 5
+        span = 125
+        numSpan = 1
 # cp : current precision, i.e., p_k
-        cp0 = 250
+        precision = 250
             
 #######################################################
 #
@@ -108,7 +108,7 @@ def network_parameters(dataset):
     
     filterSize = 3 
 
-    return (n0,cl0,gl0,cp0,bound,NN,dataBasics,directory_model_string,directory_statistics_string,directory_pic_string,filterSize)
+    return (featureDims,span,numSpan,precision,bound,NN,dataBasics,directory_model_string,directory_statistics_string,directory_pic_string,filterSize)
 
 def makedirectory(directory_name):
     if not os.path.exists(directory_name):

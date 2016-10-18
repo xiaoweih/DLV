@@ -283,9 +283,9 @@ def safety_analysis(model,dataset,statisticsFile,layer2Consider,imageIndex,st,in
 
 def withinRegion(newInput,st):
     index = [ (x,y) for (x,y) in st.cls.keys() if y == -1 ]
-    (image0,cl0,gl0,cp0,mfn0) = st.getInfo(index[0])
+    (image0,span,numSpan,precision,mfn0) = st.getInfo(index[0])
     
-    cls = cl0.keys()
+    cls = span.keys()
     wr = True
     for l in cls: 
         if dataset == "imageNet":
@@ -301,8 +301,8 @@ def withinRegion(newInput,st):
             #    wr = wr and (newInput[l] + 123.68 >= 0)
             #    wr = wr and (newInput[l] + 123.68 <= 255)
         else:
-            wr = wr and (newInput[l] >= image0[l] - cl0[l] * gl0[l] - epsilon)
-            wr = wr and (newInput[l] <= image0[l] + cl0[l] * gl0[l] + epsilon)
+            wr = wr and (newInput[l] >= image0[l] - span[l] * numSpan[l] - epsilon)
+            wr = wr and (newInput[l] <= image0[l] + span[l] * numSpan[l] + epsilon)
 
     return wr
     

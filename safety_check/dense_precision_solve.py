@@ -15,7 +15,7 @@ import display
 import mnist as mm
 
 from scipy import ndimage
-from configuration import cp0
+from configuration import precision
 
 def dense_precision_solve(nfeatures,nfilters,filters,bias,activations0,activations1,cl,gl,ncl,ngl,pk):  
 

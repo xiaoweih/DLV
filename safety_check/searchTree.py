@@ -86,7 +86,7 @@ class searchTree:
             self.images[(index,-1)] = image
             (cl,gl,nn) = initialiseRegion(model,image,self.manipulated[-1])
             # cp : current precision, i.e., p_k
-            cp = copy.deepcopy(cp0)
+            cp = copy.deepcopy(precision)
             self.cls[(index,-1)] = cl
             self.gls[(index,-1)] = gl
             self.cps[(index,-1)] = cp
