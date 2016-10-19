@@ -9,13 +9,13 @@ import os
 import mnist_network as NN_mnist
 import cifar10_network as NN_cifar10
 import imageNet_network as NN_imageNet
-import regression_network as NN_regression
+import twoDcurve_network as NN_twoDcurve
 
 
 import mnist
 import cifar10
 import imageNet
-import regression
+import twoDcurve
 
 
 def network_parameters(dataset): 
@@ -29,7 +29,7 @@ def network_parameters(dataset):
 
     if dataset in ["mnist","cifar10","imageNet"] : 
         bound = [0,1]
-    elif dataset == "regression": 
+    elif dataset == "twoDcurve": 
         bound = [0, 2 * np.pi]
     else: 
         bound = [0,0]
@@ -58,12 +58,12 @@ def network_parameters(dataset):
 # cp : current precision, i.e., p_k
         precision = 255/float(255)
     
-    elif dataset == "regression": 
-        NN = NN_regression
-        dataBasics = regression
-        directory_model_string = makedirectory("networks/regression")
-        directory_statistics_string = makedirectory("data/regression_statistics")
-        directory_pic_string = makedirectory("data/regression_pic")
+    elif dataset == "twoDcurve": 
+        NN = NN_twoDcurve
+        dataBasics = twoDcurve
+        directory_model_string = makedirectory("networks/twoDcurve")
+        directory_statistics_string = makedirectory("data/twoDcurve_statistics")
+        directory_pic_string = makedirectory("data/twoDcurve_pic")
 
 # ce: the region definition for layer 0, i.e., e_0
         featureDims = 5

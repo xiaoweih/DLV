@@ -207,7 +207,7 @@ def safety_analysis(model,dataset,statisticsFile,layer2Consider,imageIndex,st,in
 
 
             (newClass,confident) = NN.predictWithImage(model,newInput)            
-            if dataset == "regression": plt.plot([newInput[0]], [newInput[1]], 'g.')
+            if dataset == "twoDcurve": plt.plot([newInput[0]], [newInput[1]], 'g.')
 
             nprint("confident level: " + str(confident))
             # Great! we found an image which has different class with the original image

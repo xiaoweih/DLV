@@ -163,7 +163,7 @@ def loadData():
         model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
         print("Model loaded!")
         
-    elif whichMode == "train" and dataset == "regression": 
+    elif whichMode == "train" and dataset == "twoDcurve": 
         # define and construct model
 
         # load data
@@ -174,7 +174,7 @@ def loadData():
         print "Building network model ......"
         model = NN.build_model()
     
-        plot(model, to_file='regression_pic/model.png')
+        plot(model, to_file='twoDcurve_pic/model.png')
 
         # visualisation
 
@@ -197,9 +197,9 @@ def loadData():
         sio.savemat('%s/MLP.mat'%directory_model_string, {'weights': model.get_weights()})
         print("Model saved!")
 
-    elif whichMode == "read" and dataset == "regression": 
+    elif whichMode == "read" and dataset == "twoDcurve": 
         print("Start loading model ... ")
-        model = NN_regression.read_model_from_file('%s/MLP.mat'%directory_model_string,'%s/MLP.json'%directory_model_string)
+        model = NN_twoDcurve.read_model_from_file('%s/MLP.mat'%directory_model_string,'%s/MLP.json'%directory_model_string)
         #model.summary()
         print("Model loaded!")
 

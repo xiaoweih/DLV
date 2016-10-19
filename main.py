@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 from loadData import loadData 
 from regionSynth import regionSynth, initialiseRegion
 from precisionSynth import precisionSynth
-from adversarial_analysis import adversarial_analysis
 from safety_analysis import safety_analysis
 
 from configuration import *
@@ -47,15 +46,11 @@ def main():
                 #feedback = "area"
                 #handleOne(model,dataset,statisticsFile,maxilayer,whichIndex)
                 #feedback = copy.deepcopy(feedbackTemp)
-            elif task == "adversary_generation":  
-                adversarial_analysis(model,dataset,maxilayer,startIndex,span,numSpan,precision)
     # handle a single input
     else: 
         print "\n\nprocessing input of index %s in the dataset: " %(str(startIndex))
         if task == "safety_check": 
             handleOne(model,dataset,dc,statisticsFile,maxilayer,startIndex)
-        elif task == "adversary_generation":   
-            adversarial_analysis(model,dataset,maxilayer,startIndex,span,numSpan,precision)
 
     statisticsFile.close()
     dc.summarise()

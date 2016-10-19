@@ -21,7 +21,7 @@ from configuration import *
 def main():
 
 
-    #dataset = "regression"
+    #dataset = "twoDcurve"
     #dataset = "mnist"
     dataset = "cifar10"
     #dataset = "imageNet"

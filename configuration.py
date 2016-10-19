@@ -16,7 +16,6 @@ from usual_configuration import *
 #######################################################
 
 task = "safety_check"
-#task = "adversary_generation"
 
 #######################################################
 #
@@ -26,8 +25,8 @@ task = "safety_check"
 #######################################################
 
 # which dataset to work with
-#dataset = "regression"
-dataset = "mnist"
+dataset = "twoDcurve"
+#dataset = "mnist"
 #dataset = "cifar10"
 #dataset = "imageNet"
 

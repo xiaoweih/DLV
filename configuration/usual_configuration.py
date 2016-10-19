@@ -6,7 +6,7 @@ Define paramters
 
 def usual_configuration(dataset):
 
-    if dataset == "regression": 
+    if dataset == "twoDcurve": 
     
         # which image to start with or work with 
         # from the database
