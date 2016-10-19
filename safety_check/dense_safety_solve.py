@@ -48,23 +48,19 @@ def dense_safety_solve(nfeatures,nfilters,filters,bias,input,activations,pcl,pgl
     for k in span.keys():
         variable[1,1,k+1] = Real('1_y_%s' % (k+1))
         d += 1
-        string = "variable[1,1,"+ str (k+1)  + "] ==  "
+        string = "variable[1,1,%s] ==  "%(k+1)
         for l in range(nfeatures):
             if l in pcl.keys(): 
-                newstr1 = " variable[1,0,"+ str(l+1) +"] "
-                newstr1 += "*" + str(filters[l,k]) + " + "
+                newstr1 = " variable[1,0,%s] * %s + "%(l+1,filters[l,k])
             else: 
-                newstr1 = str(input[l]*filters[l,k]) + " + "
+                newstr1 = " %s + "%(input[l]*filters[l,k])
             string += newstr1
         string += str(bias[l,k])
         s.add(eval(string))
         #print(eval(string))
         c += 1
                             
-        #pStr1 = "And("
-        #pStr1 += "variable[1,1,"+ str (k+1)  + "] <= "+ str(activations[k] + pk) +" , "
-        #pStr1 += "variable[1,1,"+ str (k+1)  + "] >= " + str(activations[k] - pk) +" ) "
-        pStr1 = "variable[1,1,"+ str (k+1)  + "] == "+ str(activations[k])
+        pStr1 = "variable[1,1,%s] == %s"%(k+1, activations[k])
 
         s.add(eval(pStr1))
         c += 1
@@ -88,7 +84,7 @@ def dense_safety_solve(nfeatures,nfilters,filters,bias,input,activations,pcl,pgl
 
     if 's_return' in locals():
         if s_return == sat:
-            inputVars = [ (l,eval("variable[1,0,"+ str(l+1) + "]")) for l in pcl.keys() ]
+            inputVars = [ (l,eval("variable[1,0,%s]"%(l+1))) for l in pcl.keys() ]
             cex = copy.deepcopy(input)
             for (l,x) in inputVars:
                 cex[l] = getDecimalValue(s.model()[x])

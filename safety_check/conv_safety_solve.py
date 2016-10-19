@@ -60,9 +60,9 @@ def conv_safety_solve(layer2Consider,nfeatures,nfilters,filters,bias,input,activ
         variable[1,0,l+1,x,y] = Real('1_x_%s_%s_%s' % (l+1,x,y))
         d += 1    
         if not(boundOfPixelValue == [0,0]) and (layer2Consider == 0) and (boundRestriction == True): 
-            pstr = eval("variable[1,0,"+ str (l+1)  + ","+ str(x) +"," + str(y)+ "] <= " + str(boundOfPixelValue[1]))
-            pstr = And(eval("variable[1,0,"+ str (l+1)  + ","+ str(x) +"," + str(y)+ "] >= " + str(boundOfPixelValue[0])), pstr)
-            pstr = And(eval("variable[1,0,"+ str (l+1)  + ","+ str(x) +"," + str(y)+ "] != %s"%(images[l][x][y])), pstr)
+            pstr = eval("variable[1,0,%s,%s,%s] <= %s"%(l+1,x,y,boundOfPixelValue[1]))
+            pstr = And(eval("variable[1,0,%s,%s,%s] >= %s"%(l+1,x,y,boundOfPixelValue[0])), pstr)
+            pstr = And(eval("variable[1,0,%s,%s,%s] != %s"%(l+1,x,y,images[l][x][y])), pstr)
 
             s.add(pstr)
             c += 1                
@@ -70,23 +70,22 @@ def conv_safety_solve(layer2Consider,nfeatures,nfilters,filters,bias,input,activ
     for (k,x,y) in span.keys():
         variable[1,1,k+1,x,y] = Real('1_y_%s_%s_%s' % (k+1,x,y))
         d += 1
-        string = "variable[1,1,"+ str (k+1)  + ","+ str(x) +"," + str(y)+ "] == "
+        string = "variable[1,1,%s,%s,%s] == "%(k+1,x,y)
         for l in range(nfeatures): 
            for x1 in range(filterSize):
                 for y1 in range(filterSize): 
                     if (l,x+x1,y+y1) in toBeChanged: 
-                        newstr1 = " variable[1,0,"+ str(l+1) +"," +str(x+x1)+"," + str(y+y1)+"] "
-                        newstr1 += "*" + str(filters[l,k][x1][y1]) + " + "   
+                        newstr1 = " variable[1,0,%s,%s,%s] * %s + "%(l+1,x+x1,y+y1,filters[l,k][x1][y1])
                     elif x+x1 < images.shape[1] and y+y1 < images.shape[2] : 
-                        newstr1 = str(images[l][x+x1][y+y1] * filters[l,k][x1][y1]) + " + "   
+                        newstr1 = " %s + "%(images[l][x+x1][y+y1] * filters[l,k][x1][y1])
                     string += newstr1
         string += str(bias[l,k])
         s.add(eval(string))
         c += 1
                     
         if enumerationMethod == "line": 
-            pstr = eval("variable[1,1,"+ str (k+1)  + ","+ str(x) +"," + str(y)+ "] < " + str(activations[k][x][y] + span[(k,x,y)] * numSpan[(k,x,y)] + pk))
-            pstr = And(eval("variable[1,1,"+ str (k+1)  + ","+ str(x) +"," + str(y)+ "] > " + str(activations[k][x][y] + span[(k,x,y)] * numSpan[(k,x,y)] - pk)), pstr)
+            pstr = eval("variable[1,1,%s,%s,%s] < %s" %(k+1,x,y,activations[k][x][y] + span[(k,x,y)] * numSpan[(k,x,y)] + pk))
+            pstr = And(eval("variable[1,1,%s,%s,%s] > %s "%(k+1,x,y,activations[k][x][y] + span[(k,x,y)] * numSpan[(k,x,y)] - pk)), pstr)
         elif enumerationMethod == "convex" or enumerationMethod == "point":
             if activations[k][x][y] + span[(k,x,y)] * numSpan[(k,x,y)] >= 0: 
                 upper = activations[k][x][y] + span[(k,x,y)] * numSpan[(k,x,y)] + pk
@@ -94,8 +93,8 @@ def conv_safety_solve(layer2Consider,nfeatures,nfilters,filters,bias,input,activ
             else: 
                 upper = -1 * (activations[k][x][y] + span[(k,x,y)] * numSpan[(k,x,y)]) + pk
                 lower = activations[k][x][y] + span[(k,x,y)] * numSpan[(k,x,y)] - pk
-            pstr = eval("variable[1,1,"+ str (k+1)  + ","+ str(x) +"," + str(y)+ "] < " + str(upper))
-            pstr = And(eval("variable[1,1,"+ str (k+1)  + ","+ str(x) +"," + str(y)+ "] > " + str(lower)), pstr)
+            pstr = eval("variable[1,1,%s,%s,%s] < %s"%(k+1,x,y,upper))
+            pstr = And(eval("variable[1,1,%s,%s,%s] > %s"%(k+1,x,y,lower)), pstr)
         s.add(pstr)
         c += 1        
 
@@ -125,11 +124,6 @@ def conv_safety_solve(layer2Consider,nfeatures,nfilters,filters,bias,input,activ
                 cex[l][x][y] = getDecimalValue(s.model()[v])
                 #print("%s\n%s"%(images[l][x][y],cex[l][x][y]))
             cex = np.squeeze(cex)
-            
-            #print inputVars
-            #print span.keys(), pcl.keys()
-            #diffs = diffImage(images,cex)
-            #print diffs
                 
             nprint("satisfiable!")
             return (True, cex)

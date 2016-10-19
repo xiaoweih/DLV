@@ -130,7 +130,6 @@ def handleOne(model,dc,startIndexOfImage):
                     (nextSpan,nextNumSpan,numDimsToMani) = regionSynth(model,dataset,image0,st.manipulated[t],t,span,numSpan,numDimsToMani)
                     st.addManipulated(t,nextSpan.keys())
 
-
                     #print "3) synthesise precision ..."
                     #if not found == True: nextNumSpan = dict(map(lambda (k,v): (k, abs(v-1)), nextNumSpan.iteritems()))
                     # np : next precision, i.e., p_{k+1}
