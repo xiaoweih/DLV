@@ -2,6 +2,8 @@
 
 """
 compupute e_k according to e_{k-1} and p_{k-1}
+author: Xiaowei Huang
+
 """
 
 import numpy as np
@@ -25,12 +27,17 @@ from networkBasics import *
 from configuration import * 
 
     
-def regionSynth(model,dataset,image,manipulated,layer2Consider,cl,gl,pk,mfn):
+def regionSynth(model,dataset,image,manipulated,layer2Consider,span,numSpan,numDimsToMani):
 
     config = NN.getConfig(model)
 
     # get weights and bias of the entire trained neural network
     (wv,bv) = NN.getWeightVector(model,layer2Consider)
+    
+    # get the type of the current layer
+    layerType = getLayerType(model,layer2Consider)
+
+    wv2Consider, bv2Consider = getWeight(wv,bv,layer2Consider)
     
     # get the activations of the previous and the current layer
     if layer2Consider == 0: 
@@ -38,78 +45,70 @@ def regionSynth(model,dataset,image,manipulated,layer2Consider,cl,gl,pk,mfn):
     else: activations0 = NN.getActivationValue(model,layer2Consider-1,image)
     activations1 = NN.getActivationValue(model,layer2Consider,image)
 
-    # get the type of the current layer
-    layerType = getLayerType(model,layer2Consider)
-    #[ lt for (l,lt) in config if layer2Consider == l ]
-    #if len(layerType) > 0: layerType = layerType[0]
-    #else: print "cannot find the layerType"
-
-    wv2Consider, bv2Consider = getWeight(wv,bv,layer2Consider)
-
     if layerType == "Convolution2D":  
         print "convolutional layer, synthesising region ..."
-        mfn = getManipulatedFeatureNumber(model,mfn,layer2Consider)
+        numDimsToMani = getManipulatedFeatureNumber(model,numDimsToMani,layer2Consider)
         if len(activations1.shape) == 3: 
-            inds = getTop3D(model,image,activations1,manipulated,cl.keys(),mfn,layer2Consider)
+            inds = getTop3D(model,image,activations1,manipulated,span.keys(),numDimsToMani,layer2Consider)
         elif len(activations1.shape) ==2: 
-            inds = getTop2D(model,image,activations1,manipulated,cl.keys(),mfn,layer2Consider)
+            inds = getTop2D(model,image,activations1,manipulated,span.keys(),numDimsToMani,layer2Consider)
         # filters can be seen as the output of a convolutional layer
         nfilters = numberOfFilters(wv2Consider)
         # features can be seen as the inputs for a convolutional layer
         nfeatures = numberOfFeatures(wv2Consider)
-        (ncl,ngl) = conv_solve_prep(model,dataBasics,nfeatures,nfilters,wv2Consider,bv2Consider,activations0,activations1,cl,gl,inds,mfn)
+        (nextSpan,nextNumSpan) = conv_region_prep(model,dataBasics,nfeatures,nfilters,wv2Consider,bv2Consider,activations0,activations1,span,numSpan,inds,numDimsToMani)
     
     elif layerType == "Dense":
         print "dense layer, synthesising region ..."
-        mfn = getManipulatedFeatureNumber(model,mfn,layer2Consider)
-        inds = getTop(model,image,activations1,manipulated,mfn,layer2Consider)
+        numDimsToMani = getManipulatedFeatureNumber(model,numDimsToMani,layer2Consider)
+        inds = getTop(model,image,activations1,manipulated,numDimsToMani,layer2Consider)
         #print(inds)
         # filters can be seen as the output of a convolutional layer
         nfilters = numberOfFilters(wv2Consider)
         # features can be seen as the inputs for a convolutional layer
         nfeatures = numberOfFeatures(wv2Consider)
-        (ncl,ngl) = dense_solve_prep(model,dataBasics,nfeatures,nfilters,wv2Consider,bv2Consider,activations0,activations1,cl,gl,inds)
+        (nextSpan,nextNumSpan) = dense_solve_prep(model,dataBasics,nfeatures,nfilters,wv2Consider,bv2Consider,activations0,activations1,span,numSpan,inds)
         
     elif layerType == "InputLayer":
         print "inputLayer layer, synthesising region ..."
-        ncl = copy.deepcopy(cl)
-        ngl = copy.deepcopy(gl)
+        nextSpan = copy.deepcopy(span)
+        nextNumSpan = copy.deepcopy(numSpan)
         
     elif layerType == "MaxPooling2D":
         print "MaxPooling2D layer, synthesising region ..."
-        ncl = {}
-        ngl = {}
-        for key in cl.keys():
+        nextSpan = {}
+        nextNumSpan = {}
+        for key in span.keys():
             if len(key) == 3: 
                 (k,i,j) = key
                 i2 = i/2
                 j2 = j/2
-                ncl[k,i2,j2] = cl[k,i,j]
-                ngl[k,i2,j2] = gl[k,i,j]
+                nextSpan[k,i2,j2] = span[k,i,j]
+                nextNumSpan[k,i2,j2] = numSpan[k,i,j]
             else: 
                 print("error: ")
                     
     elif layerType == "Flatten":
         print "Flatten layer, synthesising region ..."
-        ncl = copy.deepcopy(cl)
-        ngl = copy.deepcopy(gl)
-        ncl = {}
-        ngl = {}
+        nextSpan = copy.deepcopy(span)
+        nextNumSpan = copy.deepcopy(numSpan)
+        nextSpan = {}
+        nextNumSpan = {}
         #print activations0[k-1][i-1][j-1]
         #print activations1[(k-1)*144+(i-1)*12+(j-1)]
-        for key,value in cl.iteritems():
+        for key,value in span.iteritems():
             if len(key) == 3: 
                 (k,i,j) = key
                 il = len(activations0[0])
                 jl = len(activations0[0][0])
                 ind = k * il * jl + i * jl + jl
-                ncl[ind] = cl[key]
-                ngl[ind] = gl[key]
+                nextSpan[ind] = span[key]
+                nextNumSpan[ind] = numSpan[key]
     else: 
         print "Unknown layer type %s... "%(str(layerType))
-        ncl = copy.deepcopy(cl)
-        ngl = copy.deepcopy(gl)
-    return (ncl,ngl,mfn)
+        nextSpan = copy.deepcopy(span)
+        nextNumSpan = copy.deepcopy(numSpan)
+    return (nextSpan,nextNumSpan,numDimsToMani)
     
 
     
@@ -119,7 +118,7 @@ def regionSynth(model,dataset,image,manipulated,layer2Consider,cl,gl,pk,mfn):
 #
 ################################################################
     
-def conv_solve_prep(model,dataBasics,nfeatures,nfilters,wv,bv,activations0,activations1,cl,gl,inds,mfn):
+def conv_region_prep(model,dataBasics,nfeatures,nfilters,wv,bv,activations0,activations1,span,numSpan,inds,numDimsToMani):
 
     # space holders for computation values
     biasCollection = {}
@@ -140,12 +139,12 @@ def conv_solve_prep(model,dataBasics,nfeatures,nfilters,wv,bv,activations0,activ
             biasCollection[l,k] = bias
             filterCollection[l,k] = flipedFilter
             #print filter.shape
-    (ncl,ngl) = conv_region_solve(nfeatures,nfilters,filterCollection,biasCollection,activations0,activations1,cl,gl,inds,mfn)
+    (nextSpan,nextNumSpan) = conv_region_solve(nfeatures,nfilters,filterCollection,biasCollection,activations0,activations1,span,numSpan,inds,numDimsToMani)
     print("found the region to work ")
     
-    return (ncl,ngl)
+    return (nextSpan,nextNumSpan)
     
-def dense_solve_prep(model,dataBasics,nfeatures,nfilters,wv,bv,activations0,activations1,cl,gl,inds):
+def dense_solve_prep(model,dataBasics,nfeatures,nfilters,wv,bv,activations0,activations1,span,numSpan,inds):
 
     # space holders for computation values
     biasCollection = {}
@@ -174,10 +173,10 @@ def dense_solve_prep(model,dataBasics,nfeatures,nfilters,wv,bv,activations0,acti
     #        filterCollection[l,k] = filter
             #print("%s,%s,%s,%s"%(l,k,bias,filter))
             
-    (ncl,ngl) = dense_region_solve(nfeatures,nfilters,filterCollection,biasCollection,activations0,activations1,cl,gl,inds)
+    (nextSpan,nextNumSpan) = dense_region_solve(nfeatures,nfilters,filterCollection,biasCollection,activations0,activations1,span,numSpan,inds)
     print("found the region to work ")
-    #print ncl,ngl
-    return (ncl,ngl)
+    #print nextSpan,nextNumSpan
+    return (nextSpan,nextNumSpan)
     
     
 ############################################################
@@ -193,20 +192,20 @@ def initialiseRegion(model,image,manipulated):
     elif heuristics == "Derivative": 
         return initialiseRegionDerivative(model,image,manipulated)
         
-def getTop(model,image,activation,manipulated,mfn,layerToConsider): 
+def getTop(model,image,activation,manipulated,numDimsToMani,layerToConsider): 
     if heuristics == "Activation": 
-        return getTopActivation(activation,manipulated,layerToConsider,mfn)
+        return getTopActivation(activation,manipulated,layerToConsider,numDimsToMani)
     elif heuristics == "Derivative": 
-        return getTopDerivative(model,image,activation,manipulated,mfn,layerToConsider)
+        return getTopDerivative(model,image,activation,manipulated,numDimsToMani,layerToConsider)
 
-def getTop2D(model,image,activation,manipulated,ps,mfn,layerToConsider): 
+def getTop2D(model,image,activation,manipulated,ps,numDimsToMani,layerToConsider): 
     if heuristics == "Activation": 
-        return getTop2DActivation(activation,manipulated,ps,mfn,layerToConsider)
+        return getTop2DActivation(activation,manipulated,ps,numDimsToMani,layerToConsider)
     elif heuristics == "Derivative": 
-        return getTop2DDerivative(model,image,activation,manipulated,ps,mfn,layerToConsider)
+        return getTop2DDerivative(model,image,activation,manipulated,ps,numDimsToMani,layerToConsider)
         
-def getTop3D(model,image,activation,manipulated,ps,mfn,layerToConsider): 
+def getTop3D(model,image,activation,manipulated,ps,numDimsToMani,layerToConsider): 
     if heuristics == "Activation": 
-        return getTop3DActivation(activation,manipulated,ps,mfn,layerToConsider)
+        return getTop3DActivation(activation,manipulated,ps,numDimsToMani,layerToConsider)
     elif heuristics == "Derivative": 
-        return getTop3DDerivative(model,image,activation,manipulated,ps,mfn,layerToConsider)
+        return getTop3DDerivative(model,image,activation,manipulated,ps,numDimsToMani,layerToConsider)

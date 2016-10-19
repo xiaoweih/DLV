@@ -2,6 +2,7 @@
 
 """
 Define paramters
+author: Xiaowei Huang
 """
 
 from network_configuration import *
@@ -25,8 +26,8 @@ task = "safety_check"
 #######################################################
 
 # which dataset to work with
-dataset = "twoDcurve"
-#dataset = "mnist"
+#dataset = "twoDcurve"
+dataset = "mnist"
 #dataset = "cifar10"
 #dataset = "imageNet"
 
@@ -45,26 +46,44 @@ dataProcessing = "single"
 #dataProcessing = "batch"
 dataProcessingBatchNum = 200
 
+#######################################################
+#
+#  1. parameters related to the networks
+#
+#######################################################
 
 span = 255/float(255)   # s_p in the paper
 numSpan = 0.5           # m_p in the paper
-precision = 255/float(255)   # \varepsilon in the paper
 featureDims = 5         # dims_{k,f} in the paper
+
+# error bounds, defaulted to be 1.0
+# \varepsilon in the paper
+errorBounds = {}
+errorBounds[-1] = 1.0
+
+#######################################################
+#  get parameters from network_configuration
+#######################################################
+
+(featureDims,span,numSpan,boundOfPixelValue,NN,dataBasics,directory_model_string,directory_statistics_string,directory_pic_string,filterSize) = network_parameters(dataset)
 
 
 #######################################################
 #
-#  The following are parameters for safety checking
+#  2. The following are parameters for safety checking
 #     only useful only when take_usual_config = False
 #
 #######################################################
 
 # which image to start with or work with 
 # from the database
-startIndex = 197
+startIndexOfImage = 197
 
 # the maximal layer to work until 
-maxilayer = 0
+startLayer = 0
+
+# the maximal layer to work until 
+maxLayer = 0
 
 ## number of features of each layer 
 # in the paper, dims_L = numOfFeatures * featureDims
@@ -94,23 +113,26 @@ checkingMode = "stepwise"
 #exitWhen = "foundAll"
 exitWhen = "foundFirst"
 
+# compute the derivatives up to a specific layer
+derivativelayerUpTo = 3
+
 # do we need to generate temp_.png files
 #tempFile = "enabled"
 tempFile = "disabled"
 
-# error bounds, defaulted to be 1.0
-errorBounds = {}
-errorBounds[-1] = 1.0
 
-# compute the derivatives up to a specific layer
-derivativelayerUpTo = 3
+#######################################################
+#  get parameters for the case when take_usual_config = True
+#######################################################
 
 if take_usual_config == True: 
-    (startIndex,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile) = usual_configuration(dataset)
+    (startIndexOfImage,startLayer, maxLayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile) = usual_configuration(dataset)
+    
 
 ############################################################
 #
-#  useful parameters
+#  3. other parameters that are believed to be shared among all cases
+#  FIXME: check to see if they are really needed/used
 #
 ################################################################
 
@@ -134,12 +156,10 @@ timeout = 600
 #
 #  some miscellaneous parameters 
 #   which need to confirm whether they are useful
+#  FIXME: check to see if they are really needed/used
 #
 ################################################################
 
-# the rate of changing the activations
-# a parameter for the heuristics
-changeSpeed = float(10)
 
 # how many pixels per feature will be changed 
 num = 3 #csize - 3
@@ -159,6 +179,7 @@ epsilon = 0.1
 ############################################################
 #
 #  a parameter to decide whether 
+#  FIXME: check to see if they are really needed/used
 #
 ################################################################
 
@@ -174,6 +195,7 @@ regionSynthMethod = "condense"
 #
 #  a function to decide how many features to be manipulated in each layer
 #  this function is put here for its related to the setting of an execution
+#  FIXME: check to see if they are really needed/used
 #
 ################################################################
 
@@ -181,7 +203,7 @@ regionSynthMethod = "condense"
 #  implement a manipulation from a single element of the previous layer
 refinementRate = 1
     
-def getManipulatedFeatureNumber(model,mfn,layer2Consider): 
+def getManipulatedFeatureNumber(model,numDimsToMani,layer2Consider): 
 
     config = NN.getConfig(model)
     
@@ -191,14 +213,15 @@ def getManipulatedFeatureNumber(model,mfn,layer2Consider):
     else: print "cannot find the layerType"
 
     if layerType == "Convolution2D":  
-        return mfn # + 1
+        return numDimsToMani # + 1
     elif layerType == "Dense":  
-        return mfn * refinementRate
-    else: return mfn
+        return numDimsToMani * refinementRate
+    else: return numDimsToMani
     
 #######################################################
 #
 #  show detailedInformation or not
+#  FIXME: check to see if they are really needed/used
 #
 #######################################################
 
@@ -208,10 +231,3 @@ def nprint(str):
     if detailedInformation == True: 
         print(str)        
         
-#######################################################
-#
-#  get some parameters from network_configuration
-#
-#######################################################
-
-(featureDims,span,numSpan,precision,bound,NN,dataBasics,directory_model_string,directory_statistics_string,directory_pic_string,filterSize) = network_parameters(dataset)

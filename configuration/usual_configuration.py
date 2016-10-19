@@ -2,6 +2,7 @@
 
 """
 Define paramters
+author: Xiaowei Huang
 """
 
 def usual_configuration(dataset):
@@ -10,10 +11,13 @@ def usual_configuration(dataset):
     
         # which image to start with or work with 
         # from the database
-        startIndex = 0
+        startIndexOfImage = 0
+        
+        # the start layer to work from 
+        startLayer = 0
 
         # the maximal layer to work until 
-        maxilayer = 2
+        maxilayer = 1
 
         ## number of features of each layer 
         # in the paper, dims_L = numOfFeatures * featureDims
@@ -49,13 +53,16 @@ def usual_configuration(dataset):
         # compute the derivatives up to a specific layer
         derivativelayerUpTo = 3
 
-        return (startIndex,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
+        return (startIndexOfImage,startLayer,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
         
     elif dataset == "mnist": 
 
         # which image to start with or work with 
         # from the database
-        startIndex = 2438
+        startIndexOfImage = 2438
+        
+        # the start layer to work from 
+        startLayer = 0
 
         # the maximal layer to work until 
         maxilayer = 0
@@ -93,13 +100,16 @@ def usual_configuration(dataset):
         # compute the derivatives up to a specific layer
         derivativelayerUpTo = 3
     
-        return (startIndex,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
+        return (startIndexOfImage,startLayer,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
         
     elif dataset == "cifar10": 
     
         # which image to start with or work with 
         # from the database
-        startIndex = 330
+        startIndexOfImage = 330
+        
+        # the start layer to work from 
+        startLayer = 0
 
         # the maximal layer to work until 
         maxilayer = 0
@@ -137,13 +147,16 @@ def usual_configuration(dataset):
         # compute the derivatives up to a specific layer
         derivativelayerUpTo = 5
     
-        return (startIndex,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
+        return (startIndexOfImage,startLayer,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
 
     elif dataset == "imageNet": 
     
         # which image to start with or work with 
         # from the database
-        startIndex = 0
+        startIndexOfImage = 0
+        
+        # the start layer to work from 
+        startLayer = 0
 
         # the maximal layer to work until 
         maxilayer = 1
@@ -183,4 +196,4 @@ def usual_configuration(dataset):
         # compute the derivatives up to a specific layer
         derivativelayerUpTo = 5
     
-        return (startIndex,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
+        return (startIndexOfImage,startLayer,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)

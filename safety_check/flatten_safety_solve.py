@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+author: Xiaowei Huang
+"""
+
 
 def flatten_safety_solve(input,activations):  
 

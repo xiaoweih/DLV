@@ -2,6 +2,7 @@
 
 """
 compupute e_k according to e_{k-1} and p_{k-1}
+author: Xiaowei Huang
 """
 
 import numpy as np
@@ -31,69 +32,69 @@ def initialiseRegionActivation(model,manipulated,image):
     #else: print "cannot find the layerType"
 
     if layerType == "Convolution2D":
-        ncl = {}
-        ngl = {}
+        nextSpan = {}
+        nextNumSpan = {}
         if len(image.shape) == 2: 
             # decide how many elements in the input will be considered
             if len(image)*len(image[0])  < featureDims : 
-                mfn = len(image)*len(image[0]) 
-            else: mfn = featureDims
+                numDimsToMani = len(image)*len(image[0]) 
+            else: numDimsToMani = featureDims
             # get those elements with maximal/minimum values
-            ls = getTop2DActivation(image,manipulated,[],mfn,-1)
+            ls = getTop2DActivation(image,manipulated,[],numDimsToMani,-1)
 
         elif len(image.shape) == 3:
             # decide how many elements in the input will be considered
             if len(image)*len(image[0])*len(image[0][0])  < featureDims : 
-                mfn = len(image)*len(image[0])*len(image[0][0])
-            else: mfn = featureDims
+                numDimsToMani = len(image)*len(image[0])*len(image[0][0])
+            else: numDimsToMani = featureDims
             # get those elements with maximal/minimum values
-            ls = getTop3DActivation(image,manipulated,[],mfn,-1)     
+            ls = getTop3DActivation(image,manipulated,[],numDimsToMani,-1)     
                 
         for i in ls: 
-            ncl[i] = span
-            ngl[i] = numSpan
+            nextSpan[i] = span
+            nextNumSpan[i] = numSpan
 
     elif layerType == "InputLayer":
-        ncl = {}
-        ngl = {}
+        nextSpan = {}
+        nextNumSpan = {}
         # decide how many elements in the input will be considered
         if len(image)  < featureDims : 
-            mfn = len(image) 
-        else: mfn = featureDims
+            numDimsToMani = len(image) 
+        else: numDimsToMani = featureDims
         # get those elements with maximal/minimum values
-        ls = getTopActivation(image,manipulated,-1,mfn)
+        ls = getTopActivation(image,manipulated,-1,numDimsToMani)
         for i in ls: 
-            ncl[i] = span
-            ngl[i] = numSpan
+            nextSpan[i] = span
+            nextNumSpan[i] = numSpan
             
     elif layerType == "ZeroPadding2D": 
         #image1 = addZeroPadding2D(image)
         image1 = image
-        ncl = {}
-        ngl = {}
+        nextSpan = {}
+        nextNumSpan = {}
         if len(image1.shape) == 2: 
             # decide how many elements in the input will be considered
             if len(image1)*len(image1[0])  < featureDims : 
-                mfn = len(image1)*len(image1[0]) 
-            else: mfn = featureDims
+                numDimsToMani = len(image1)*len(image1[0]) 
+            else: numDimsToMani = featureDims
             # get those elements with maximal/minimum values
-            ls = getTop2DActivation(image1,manipulated,[],mfn,-1)
+            ls = getTop2DActivation(image1,manipulated,[],numDimsToMani,-1)
 
         elif len(image1.shape) == 3:
             # decide how many elements in the input will be considered
             if len(image1)*len(image1[0])*len(image1[0][0])  < featureDims : 
-                mfn = len(image1)*len(image1[0])*len(image1[0][0])
-            else: mfn = featureDims
+                numDimsToMani = len(image1)*len(image1[0])*len(image1[0][0])
+            else: numDimsToMani = featureDims
             # get those elements with maximal/minimum values
-            ls = getTop3DActivation(image1,manipulated,[],mfn,-1)         
+            ls = getTop3DActivation(image1,manipulated,[],numDimsToMani,-1)         
         for i in ls: 
-            ncl[i] = span
-            ngl[i] = numSpan
+            nextSpan[i] = span
+            nextNumSpan[i] = numSpan
         
     else: 
         print "initialiseRegionActivation: Unknown layer type ... "
         
-    return (ncl,ngl,mfn)
+    return (nextSpan,nextNumSpan,numDimsToMani)
     
     
 
@@ -106,7 +107,7 @@ def initialiseRegionActivation(model,manipulated,image):
     
 # This function only suitable for the input as a list, not a multi-dimensional array
 
-def getTopActivation(image,manipulated,layerToConsider,mfn): 
+def getTopActivation(image,manipulated,layerToConsider,numDimsToMani): 
 
     avoid = repeatedManipulation == "disallowed"
     
@@ -116,7 +117,7 @@ def getTopActivation(image,manipulated,layerToConsider,mfn):
     topImage = {}
     toBeDeleted = []
     for i in range(len(image)):
-        if len(topImage) < mfn and ((not avoid) or (i not in manipulated)): 
+        if len(topImage) < numDimsToMani and ((not avoid) or (i not in manipulated)): 
             topImage[i] = nimage[i]
         else: 
             bl = False
@@ -131,7 +132,7 @@ def getTopActivation(image,manipulated,layerToConsider,mfn):
         del topImage[k]
     return topImage.keys()
     
-def getTop2DActivation(image,manipulated,ps,mfn,layerToConsider): 
+def getTop2DActivation(image,manipulated,ps,numDimsToMani,layerToConsider): 
 
     avoid = repeatedManipulation == "disallowed"
 
@@ -144,7 +145,7 @@ def getTop2DActivation(image,manipulated,ps,mfn,layerToConsider):
     toBeDeleted = []
     for i in range(len(image)):
         for j in range(len(image[0])):
-            if len(topImage) < mfn: 
+            if len(topImage) < numDimsToMani: 
                 topImage[(i,j)] = nimage[i][j]
             else: 
                 bl = False 
@@ -161,7 +162,7 @@ def getTop2DActivation(image,manipulated,ps,mfn,layerToConsider):
 
 # ps are indices of the previous layer
 
-def getTop3DActivation(image,manipulated,ps,mfn,layerToConsider): 
+def getTop3DActivation(image,manipulated,ps,numDimsToMani,layerToConsider): 
 
     avoid = repeatedManipulation == "disallowed"
 
@@ -180,7 +181,7 @@ def getTop3DActivation(image,manipulated,ps,mfn,layerToConsider):
             ps = zip(p2,p3)
     ks = []
     pointsToConsider = []
-    for i in range(mfn): 
+    for i in range(numDimsToMani): 
         if i <= len(ps) - 1: 
             (x,y) = ps[i] 
             nps = [ (x-x1,y-y1) for x1 in range(filterSize) for y1 in range(filterSize) if x-x1 >= 0 and y-y1 >=0 ]
@@ -191,13 +192,13 @@ def getTop3DActivation(image,manipulated,ps,mfn,layerToConsider):
     return ks
     
     
-def findFromArea3D(image,manipulated,avoid,nimage,ps,mfn,ks):
+def findFromArea3D(image,manipulated,avoid,nimage,ps,numDimsToMani,ks):
     topImage = {}
     toBeDeleted = []
     for i in range(len(image)):
         for j in range(len(image[0])):
             for k in range(len(image[0][0])):
-                if len(topImage) < mfn and ((j,k) in ps or len(ps) == 0) and (i,j,k) not in ks: 
+                if len(topImage) < numDimsToMani and ((j,k) in ps or len(ps) == 0) and (i,j,k) not in ks: 
                     topImage[(i,j,k)] = nimage[i][j][k]
                 elif ((j,k) in ps or len(ps) == 0) and (i,j,k) not in ks: 
                     bl = False 

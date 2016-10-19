@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+author: Xiaowei Huang
+"""
+
 import numpy as np
 import math
 import ast
@@ -18,15 +22,15 @@ from scipy import ndimage
 
 from configuration import *
 
-def dense_region_solve(nfeatures,nfilters,filters,bias,activations0,activations1,cl,gl,inds):  
+def dense_region_solve(nfeatures,nfilters,filters,bias,activations0,activations1,span,numSpan,inds):  
 
     if regionSynthMethod == "stretch": 
-        return stretch(nfeatures,nfilters,filters,bias,activations0,activations1,cl,gl,inds)
+        return stretch(nfeatures,nfilters,filters,bias,activations0,activations1,span,numSpan,inds)
     elif regionSynthMethod == "condense":
-        return condense(nfeatures,nfilters,filters,bias,activations0,activations1,cl,gl,inds)
+        return condense(nfeatures,nfilters,filters,bias,activations0,activations1,span,numSpan,inds)
 
 
-def condense(nfeatures,nfilters,filters,bias,activations0,activations1,cl,gl,inds):  
+def condense(nfeatures,nfilters,filters,bias,activations0,activations1,span,numSpan,inds):  
 
     random.seed(time.time())
 
@@ -40,12 +44,12 @@ def condense(nfeatures,nfilters,filters,bias,activations0,activations1,cl,gl,ind
     
     s = Solver()
     
-    # initialise ncl and ngl for later refinement
-    ncl = {}
-    ngl = {}
+    # initialise nextSpan and nextNumSpan for later refinement
+    nextSpan = {}
+    nextNumSpan = {}
         
     decidedDims = []
-    for l in cl.keys(): 
+    for l in span.keys(): 
         dims = random.sample([ x for x in inds if x not in decidedDims], refinementRate)
         decidedDims = decidedDims + dims
         for k in dims: 
@@ -53,25 +57,25 @@ def condense(nfeatures,nfilters,filters,bias,activations0,activations1,cl,gl,ind
             #  there are 3^n possible manipulations, and 
             #  for the current k, we select the longest change as its manipulation
             #  so that the region of the next layer can cover the previous layer 
-            ncl[k] = 0
-            for l1 in cl.keys():
-                ncl[k] += abs(cl[l1] * gl[l1] * filters[l1,k])
-            ncltemp = 0
+            nextSpan[k] = 0
+            for l1 in span.keys():
+                nextSpan[k] += abs(span[l1] * numSpan[l1] * filters[l1,k])
+            nextSpantemp = 0
             for l1 in range(nfeatures): 
                 #print nfeatures, l1
-                if l1 not in cl.keys():
-                    ncltemp +=  filters[l1,k] * activations0[l1]
-            ncltemp += bias[l,k]
-            ncl[k] += abs(ncltemp)
-            ngl[k] = gl[l]
+                if l1 not in span.keys():
+                    nextSpantemp +=  filters[l1,k] * activations0[l1]
+            nextSpantemp += bias[l,k]
+            nextSpan[k] += abs(nextSpantemp)
+            nextNumSpan[k] = numSpan[l]
             # adjust 
-            lst = addexp([0],cl.keys(),cl,k,filters)
-            lst2 = map(abs,lst+[ncl[k]])
+            lst = addexp([0],span.keys(),span,k,filters)
+            lst2 = map(abs,lst+[nextSpan[k]])
             npk = findMin(min(lst2),lst2)
-            t = math.ceil(ncl[k] / npk)
-            ncl[k] = npk
-            ngl[k] = gl[l] * t
-    return (ncl,ngl)
+            t = math.ceil(nextSpan[k] / npk)
+            nextSpan[k] = npk
+            nextNumSpan[k] = numSpan[l] * t
+    return (nextSpan,nextNumSpan)
     
 def findMin(v,lst):
 
@@ -84,19 +88,19 @@ def findMin(v,lst):
         return findMin(v / float(2),lst)
     
     
-def addexp(lst,cls,cl,k,filters):
+def addexp(lst,cls,span,k,filters):
     # this is to find the smallest change of k
     # with respect to the manipulations of the previous layer
     lst2 = []
     l = cls[0]
     # print lst
     for e in lst: 
-        e1 = e + filters[l,k] * cl[l]
-        e2 = e - filters[l,k] * cl[l]
+        e1 = e + filters[l,k] * span[l]
+        e2 = e - filters[l,k] * span[l]
         lst2 = lst2 + [e1,e2]
     remain = cls[1:]
     if len(remain) > 0: 
-        return addexp(lst2,remain,cl,k,filters)
+        return addexp(lst2,remain,span,k,filters)
     else: return lst2
 
 """
@@ -105,11 +109,11 @@ def addexp(lst,cls,cl,k,filters):
         variable[1,0,l+1] = Real('1_x_%s' % (l+1))
         varlist00 = "variable[0,0,%s]"%(l+1)
         varlist10 = "[variable[1,0,%s]"%(l+1)
-        str001 = "variable[0,0,%s] <= %s "%(l+1, activations0[l] + cl[l] * gl[l])
-        str002 = "variable[0,0,%s] >= %s "%(l+1, activations0[l] - cl[l] * gl[l])
+        str001 = "variable[0,0,%s] <= %s "%(l+1, activations0[l] + span[l] * numSpan[l])
+        str002 = "variable[0,0,%s] >= %s "%(l+1, activations0[l] - span[l] * numSpan[l])
         str00 = "And(" + str001 + "," + str002 +")"
 
-        str10 = "variable[1,0,%s] ==  variable[0,0,%s] + %s "%(l+1,l+1,cl[l])
+        str10 = "variable[1,0,%s] ==  variable[0,0,%s] + %s "%(l+1,l+1,span[l])
 
         # the relation between two layers on the two points: current point and manipulated point
         for k in dims: 
@@ -153,7 +157,7 @@ def addexp(lst,cls,cl,k,filters):
             s.add(eval(formula))
             print eval(formula)
 
-            # FIXME: want to impose timeout on a single z3 run, 
+            # FIXME: want to impose timeout on a sinextNumSpane z3 run, 
             # but does not take effect ....
 
             p = multiprocessing.Process(target=s.check)
@@ -175,19 +179,19 @@ def addexp(lst,cls,cl,k,filters):
                 if s_return == sat:
                     inputVars = [ (k,eval("variable[2,1,%s]"%(k+1)),eval("variable[3,1,%s]"%(k+1))) ]
                     for (k,g,c) in inputVars:
-                        ngl[k] = getDecimalValue(s.model()[g])
-                        ncl[k] = getDecimalValue(s.model()[c])
+                        nextNumSpan[k] = getDecimalValue(s.model()[g])
+                        nextSpan[k] = getDecimalValue(s.model()[c])
                 else:
                     print "unsatisfiable! Need a fix ... "
             else:
                 print "timeout!"
                 break
         
-    return (ncl,ngl)
+    return (nextSpan,nextNumSpan)
 """
 
 
-def stretch(nfeatures,nfilters,filters,bias,activations0,activations1,cl,gl,inds):  
+def stretch(nfeatures,nfilters,filters,bias,activations0,activations1,span,numSpan,inds):  
 
 
     random.seed(time.time())
@@ -202,20 +206,20 @@ def stretch(nfeatures,nfilters,filters,bias,activations0,activations1,cl,gl,inds
     
     s = Tactic('lra').solver()
     
-    # initialise ncl and ngl for later refinement
-    ncl = {}
-    ngl = {}
+    # initialise nextSpan and nextNumSpan for later refinement
+    nextSpan = {}
+    nextNumSpan = {}
     for k in inds:
-        ncl[k] = np.max(cl.values())
-        ngl[k] = np.max(gl.values())
+        nextSpan[k] = np.max(span.values())
+        nextNumSpan[k] = np.max(numSpan.values())
                 
     # the value of the second layer
     for k in inds: 
         while (True): 
             s.reset()
             variable[1,k+1] = Real('y_%s' % (k+1))
-            str11 = "variable[1,"+ str (k+1) + "] <=  " + str(activations1[k] + ncl[k] * ngl[k])
-            str12 = "variable[1,"+ str (k+1) + "] >=  " + str(activations1[k] - ncl[k] * ngl[k])
+            str11 = "variable[1,"+ str (k+1) + "] <=  " + str(activations1[k] + nextSpan[k] * nextNumSpan[k])
+            str12 = "variable[1,"+ str (k+1) + "] >=  " + str(activations1[k] - nextSpan[k] * nextNumSpan[k])
             str1 = "And(" + str11 + "," + str12 +")"
                     
             forallVarlist = ""
@@ -223,10 +227,10 @@ def stretch(nfeatures,nfilters,filters,bias,activations0,activations1,cl,gl,inds
             existsVarList = "variable[1,"+ str (k+1) + "]"
             postcond = "variable[1,"+ str (k+1) + "] ==  "
             for l in range(nfeatures):
-                if l in cl.keys():
+                if l in span.keys():
                     variable[0,l+1] = Real('x_%s' % (l+1))
-                    str21 = "variable[0,"+ str (l+1) + "] <=  " + str(activations0[l] + cl[l] * gl[l])
-                    str22 = "variable[0,"+ str (l+1) + "] >=  " + str(activations0[l] - cl[l] * gl[l])
+                    str21 = "variable[0,"+ str (l+1) + "] <=  " + str(activations0[l] + span[l] * numSpan[l])
+                    str22 = "variable[0,"+ str (l+1) + "] >=  " + str(activations0[l] - span[l] * numSpan[l])
                     str2 = "And(" + str21 + "," + str22 +")"
                     if precond == "": 
                             precond = str2
@@ -252,7 +256,7 @@ def stretch(nfeatures,nfilters,filters,bias,activations0,activations1,cl,gl,inds
             #s.add(eval("forall("+forallVarlist + "," + formula+")"))
             s.add(eval(formula))
 
-            # FIXME: want to impose timeout on a single z3 run, 
+            # FIXME: want to impose timeout on a sinextNumSpane z3 run, 
             # but does not take effect ....
 
             p = multiprocessing.Process(target=s.check)
@@ -272,15 +276,15 @@ def stretch(nfeatures,nfilters,filters,bias,activations0,activations1,cl,gl,inds
 
             if 's_return' in locals():
                 if s_return == sat:
-                    print "found a region for dimension %s with value (cl,gl) = (%s, %s)"%(k,str(ncl[k]),str(ngl[k]))
+                    print "found a region for dimension %s with value (span,numSpan) = (%s, %s)"%(k,str(nextSpan[k]),str(nextNumSpan[k]))
                     break
                 else:
-                    #print "unsatisfiable!" + str(ngl[(k,x,y)])
-                    ngl[k] = ngl[k] + 1
+                    #print "unsatisfiable!" + str(nextNumSpan[(k,x,y)])
+                    nextNumSpan[k] = nextNumSpan[k] + 1
             else:
                 print "timeout!"
                 break
         
-    return (ncl,ngl)
+    return (nextSpan,nextNumSpan)
 
 

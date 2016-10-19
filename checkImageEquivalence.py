@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 """
+author: Xiaowei Huang
 """
 
 import sys
@@ -39,7 +40,7 @@ def main():
     k = diffImage(image1,image2)
     print "%s input elements are changed."%(k)
     
-    (model,dataset,maxilayer,startIndex) = loadData()
+    (model,dataset,maxLayer,startIndexOfImage) = loadData()
 
     (class1,confidence1) = NN.predictWithImage(model,image1)
     classStr1 = dataBasics.LABELS(int(class1))

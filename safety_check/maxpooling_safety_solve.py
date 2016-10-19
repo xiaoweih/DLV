@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+"""
+author: Xiaowei Huang
+"""
 
 def maxpooling_safety_solve(input,activations):  
 

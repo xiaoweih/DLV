@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+"""
+author: Xiaowei Huang
+"""
 
 import numpy as np
 import time
@@ -12,17 +15,16 @@ from regionSynth import initialiseRegion
 class searchTree:
 
 
-    # used to store historical images, cls and gls
+    # used to store historical images, spans and numSpans
     # a pair (i,p) is used to represent the index i of the current 
     #  node and its parent node p
-    # mfn records the number of features to be manipulated
+    # numDimsToMani records the number of features to be manipulated
 
     def __init__(self, image, k):
         self.images = {}
-        self.cls = {}
-        self.gls = {}
-        self.cps = {}
-        self.mfns = {}
+        self.spans = {}
+        self.numSpans = {}
+        self.numDimsToManis = {}
         
         # a list of input elements that have been manipulated 
         # we try to avoid update these again
@@ -40,10 +42,9 @@ class searchTree:
         
     def destructor(self): 
         self.images = {}
-        self.cls = {}
-        self.gls = {}
-        self.cps = {}
-        self.mfns = {}
+        self.spans = {}
+        self.numSpans = {}
+        self.numDimsToManis = {}
         self.manipulated = {}
         self.images[(-1,-1)] = []
         self.rk = []        
@@ -57,7 +58,7 @@ class searchTree:
         else: return (-1,-1)
     
     def getInfo(self,index):
-        return (copy.deepcopy(self.images[index]),self.cls[index],self.gls[index],self.cps[index],self.mfns[index])
+        return (copy.deepcopy(self.images[index]),self.spans[index],self.numSpans[index],self.numDimsToManis[index])
 
     def getHowFar(self,pi,n):
         #if pi >= (numOfPointsAfterEachFeature ** n): 
@@ -70,13 +71,12 @@ class searchTree:
             if k == pi: 
                 return (k,d)
 
-    def addIntermediateNode(self,image,cl,gl,cp,mfn,index):
+    def addIntermediateNode(self,image,span,numSpan,cp,numDimsToMani,index):
         index = (index[0]+1,index[0])
         self.images[index] = image
-        self.cls[index] = cl
-        self.gls[index] = gl
-        self.cps[index] = cp
-        self.mfns[index] = mfn
+        self.spans[index] = span
+        self.numSpans[index] = numSpan
+        self.numDimsToManis[index] = numDimsToMani
         return index
         
     def addImages(self,model,ims):
@@ -84,18 +84,15 @@ class searchTree:
         index = max(inds) + 1
         for image in ims: 
             self.images[(index,-1)] = image
-            (cl,gl,nn) = initialiseRegion(model,image,self.manipulated[-1])
-            # cp : current precision, i.e., p_k
-            cp = copy.deepcopy(precision)
-            self.cls[(index,-1)] = cl
-            self.gls[(index,-1)] = gl
-            self.cps[(index,-1)] = cp
-            self.mfns[(index,-1)] = nn
+            (span,numSpan,nn) = initialiseRegion(model,image,self.manipulated[-1])
+            self.spans[(index,-1)] = span
+            self.numSpans[(index,-1)] = numSpan
+            self.numDimsToManis[(index,-1)] = nn
             self.rk.append((index,-1))
             index += 1
             
             manipulated1 = set(self.manipulated[-1])
-            manipulated2 = set(self.manipulated[-1] + cl.keys())
+            manipulated2 = set(self.manipulated[-1] + span.keys())
             if reset == "onEqualManipulationSet" and manipulated1 == manipulated2: 
                 self.clearManipulated(len(self.manipulated))
             else: self.manipulated[-1] = list(manipulated2)
@@ -110,7 +107,7 @@ class searchTree:
             self.manipulated[i] = []
                         
     def removeProcessed(self,index):
-        children = [ (k,p) for (k,p) in self.cls.keys() if p == index[0] ]
+        children = [ (k,p) for (k,p) in self.spans.keys() if p == index[0] ]
         if children == []: 
             self.removeNode(index)
         else: 
@@ -120,7 +117,6 @@ class searchTree:
                 
     def removeNode(self,index):
         del self.images[index]
-        del self.cls[index]
-        del self.gls[index]
-        del self.cps[index]
-        del self.mfns[index]
+        del self.spans[index]
+        del self.numSpans[index]
+        del self.numDimsToManis[index]

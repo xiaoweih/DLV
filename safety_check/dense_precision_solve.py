@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+author: Xiaowei Huang
+"""
+
 import numpy as np
 import math
 import ast
@@ -15,33 +19,33 @@ import display
 import mnist as mm
 
 from scipy import ndimage
-from configuration import precision
 
-def dense_precision_solve(nfeatures,nfilters,filters,bias,activations0,activations1,cl,gl,ncl,ngl,pk):  
+
+def dense_precision_solve(nfeatures,nfilters,filters,bias,activations0,activations1,span,numSpan,nextSpan,nextNumSpan,pk):  
 
     # for every dimension k of the next layer, the smallest change 
     # means that it is able to implement the previous layer's manipulations 
-    npk = min(ncl.values()) 
-    for k in ncl.keys():
-        lst = addexp([0],cl.keys(),cl,k,filters)
+    npk = min(nextSpan.values()) 
+    for k in nextSpan.keys():
+        lst = addexp([0],span.keys(),span,k,filters)
         npk = min(map(abs,lst+[npk]))
     return npk
         
     
     
-def addexp(lst,cls,cl,k,filters):
+def addexp(lst,cls,span,k,filters):
     # this is to find the smallest change of k
     # with respect to the manipulations of the previous layer
     lst2 = []
     l = cls[0]
     # print lst
     for e in lst: 
-        e1 = e + filters[l,k] * cl[l]
-        e2 = e - filters[l,k] * cl[l]
+        e1 = e + filters[l,k] * span[l]
+        e2 = e - filters[l,k] * span[l]
         lst2 = lst2 + [e1,e2]
     remain = cls[1:]
     if len(remain) > 0: 
-        return addexp(lst2,remain,cl,k,filters)
+        return addexp(lst2,remain,span,k,filters)
     else: return lst2
     
 
@@ -63,7 +67,7 @@ def addexp(lst,cls,cl,k,filters):
     factor = 10
     lowered = False
     # the value of the second layer
-    for k in ncl.keys(): 
+    for k in nextSpan.keys(): 
         if lowered == True: 
             print("synthesising precision on a point (%s,%s,%s) with precision %s "%(k,x,y,npk))
             lowered = False
@@ -73,8 +77,8 @@ def addexp(lst,cls,cl,k,filters):
             s.reset()
             variable[0,1,k+1] = Real('0_y_%s' % (k+1))
             # v_k \in e_k(A_{i,k})
-            str11 = "variable[0,1,"+ str (k+1) + "] <=  " + str(activations1[k] + ncl[k] * ngl[k])
-            str12 = "variable[0,1,"+ str (k+1) + "] >=  " + str(activations1[k] - ncl[k] * ngl[k])
+            str11 = "variable[0,1,"+ str (k+1) + "] <=  " + str(activations1[k] + nextSpan[k] * nextNumSpan[k])
+            str12 = "variable[0,1,"+ str (k+1) + "] >=  " + str(activations1[k] - nextSpan[k] * nextNumSpan[k])
             str1 = "And(" + str11 + "," + str12 +")"
             vklist = "variable[0,1,"+ str (k+1) + "]"
                     
@@ -89,11 +93,11 @@ def addexp(lst,cls,cl,k,filters):
             vkmplist = ""
 
             str5 = "variable[1,1,"+ str (k+1) + "] ==  "
-            for l in cl.keys(): 
+            for l in span.keys(): 
                 # v_{k-1} \in e_{k-1}(A_{i,k-1})
                 variable[0,0,l+1] = Real('0_x_%s' % (l+1))
-                str31 = "variable[0,0,"+ str (l+1) + "] <=  " + str(activations0[l] + cl[l] * gl[l])
-                str32 = "variable[0,0,"+ str (l+1) + "] >=  " + str(activations0[l] - cl[l] * gl[l])
+                str31 = "variable[0,0,"+ str (l+1) + "] <=  " + str(activations0[l] + span[l] * numSpan[l])
+                str32 = "variable[0,0,"+ str (l+1) + "] >=  " + str(activations0[l] - span[l] * numSpan[l])
                 str3 = "And(" + str31 + "," + str32 +")"
 
                 # v_{k-1}' \in p_{k-1}(v_{k-1})
@@ -131,7 +135,7 @@ def addexp(lst,cls,cl,k,filters):
             s.add(eval(formula4))
 
     
-            # FIXME: want to impose timeout on a single z3 run, 
+            # FIXME: want to impose timeout on a sinextNumSpane z3 run, 
             # but does not take effect ....
 
             p = multiprocessing.Process(target=s.check)

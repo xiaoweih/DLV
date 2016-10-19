@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+"""
+author: Xiaowei Huang
+"""
 
 import numpy as np
 import time

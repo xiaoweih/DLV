@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 """
-compupute p_k according to e_k = (ncl,ngl), e_{k-1} = (cl,gl) and p_{k-1}
+compupute p_k according to e_k = (nextSpan,nextNumSpan), e_{k-1} = (cl,gl) and p_{k-1}
+author: Xiaowei Huang
 """
 
 
@@ -19,24 +20,24 @@ from basics import *
 
 
 
-def precisionSynth(layer2Consider,ncl,ngl):
+def precisionSynth(layer2Consider,nextSpan,nextNumSpan):
 
     if layer2Consider in errorBounds.keys(): 
         pk = errorBounds[layer2Consider]
     else: 
         pk = errorBounds[-1]
     
-    for k in ncl.keys(): 
-        length = ncl[k] * ngl[k]
-        ngl[k] = math.ceil(length / float(pk))
-        ncl[k] = pk
+    for k in nextSpan.keys(): 
+        length = nextSpan[k] * nextNumSpan[k]
+        nextNumSpan[k] = math.ceil(length / float(pk))
+        nextSpan[k] = pk
         
-    return (ncl,ngl,pk)
+    return (nextSpan,nextNumSpan,pk)
 
 
 """
 
-def precisionSynth(model,dataset,image,layer2Consider,cl,gl,ncl,ngl,pk):
+def precisionSynth(model,dataset,image,layer2Consider,cl,gl,nextSpan,nextNumSpan,pk):
 
 
     config = NN.getConfig(model)
@@ -64,7 +65,7 @@ def precisionSynth(model,dataset,image,layer2Consider,cl,gl,ncl,ngl,pk):
         nfilters = numberOfFilters(wv2Consider)
         # features can be seen as the inputs for a convolutional layer
         nfeatures = numberOfFeatures(wv2Consider)
-        npk = conv_solve_prep(model,dataBasics,nfeatures,nfilters,wv2Consider,bv2Consider,activations0,activations1,cl,gl,ncl,ngl,pk)
+        npk = conv_solve_prep(model,dataBasics,nfeatures,nfilters,wv2Consider,bv2Consider,activations0,activations1,cl,gl,nextSpan,nextNumSpan,pk)
         
     elif layerType == "Dense":  
         print "dense layer, synthesising precision ..."
@@ -72,7 +73,7 @@ def precisionSynth(model,dataset,image,layer2Consider,cl,gl,ncl,ngl,pk):
         nfilters = numberOfFilters(wv2Consider)
         # features can be seen as the inputs for a convolutional layer
         nfeatures = numberOfFeatures(wv2Consider)
-        npk = dense_solve_prep(model,dataBasics,nfeatures,nfilters,wv2Consider,bv2Consider,activations0,activations1,cl,gl,ncl,ngl,pk)
+        npk = dense_solve_prep(model,dataBasics,nfeatures,nfilters,wv2Consider,bv2Consider,activations0,activations1,cl,gl,nextSpan,nextNumSpan,pk)
         
     elif layerType == "InputLayer":  
         print "inputLayer layer, synthesising precision ..."
@@ -83,7 +84,7 @@ def precisionSynth(model,dataset,image,layer2Consider,cl,gl,ncl,ngl,pk):
     return npk
     
     
-def conv_solve_prep(model,dataBasics,nfeatures,nfilters,wv,bv,activations0,activations1,cl,gl,ncl,ngl,pk):
+def conv_solve_prep(model,dataBasics,nfeatures,nfilters,wv,bv,activations0,activations1,cl,gl,nextSpan,nextNumSpan,pk):
 
     # space holders for computation values
     biasCollection = {}
@@ -105,13 +106,13 @@ def conv_solve_prep(model,dataBasics,nfeatures,nfilters,wv,bv,activations0,activ
             filterCollection[l,k] = flipedFilter
             #print filter.shape
             
-    npk = conv_precision_solve(nfeatures,nfilters,filterCollection,biasCollection,activations0,activations1,cl,gl,ncl,ngl,pk)
+    npk = conv_precision_solve(nfeatures,nfilters,filterCollection,biasCollection,activations0,activations1,cl,gl,nextSpan,nextNumSpan,pk)
     #print("found the region to work ")
     
     return npk
     
     
-def dense_solve_prep(model,dataBasics,nfeatures,nfilters,wv,bv,activations0,activations1,cl,gl,ncl,ngl,pk):
+def dense_solve_prep(model,dataBasics,nfeatures,nfilters,wv,bv,activations0,activations1,cl,gl,nextSpan,nextNumSpan,pk):
 
     # space holders for computation values
     biasCollection = {}
@@ -125,7 +126,7 @@ def dense_solve_prep(model,dataBasics,nfeatures,nfilters,wv,bv,activations0,acti
             for l in range(nfeatures): 
                 biasCollection[l,c-1] = w
             
-    npk = dense_precision_solve(nfeatures,nfilters,filterCollection,biasCollection,activations0,activations1,cl,gl,ncl,ngl,pk)
+    npk = dense_precision_solve(nfeatures,nfilters,filterCollection,biasCollection,activations0,activations1,cl,gl,nextSpan,nextNumSpan,pk)
     #print("found the region to work ")
     
     return npk

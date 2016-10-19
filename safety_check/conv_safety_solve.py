@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+author: Xiaowei Huang
+"""
+
 import numpy as np
 import math
 import ast
@@ -19,7 +23,7 @@ from scipy import ndimage
 from configuration import *
 from basics import *
 
-def conv_safety_solve(layer2Consider,nfeatures,nfilters,filters,bias,input,activations,pcl,pgl,cl,gl,pk):  
+def conv_safety_solve(layer2Consider,nfeatures,nfilters,filters,bias,input,activations,pcl,pgl,span,numSpan,pk):  
 
     random.seed(time.time())
     
@@ -37,7 +41,7 @@ def conv_safety_solve(layer2Consider,nfeatures,nfilters,filters,bias,input,activ
     s = Tactic('qflra').solver()
     s.reset()
     
-    #print("%s\n%s\n%s\n%s"%(pcl,pgl,cl,gl))
+    #print("%s\n%s\n%s\n%s"%(pcl,pgl,span,numSpan))
     
     toBeChanged = []
     if feedback == "point": 
@@ -47,7 +51,7 @@ def conv_safety_solve(layer2Consider,nfeatures,nfilters,filters,bias,input,activ
         else: ks = copy.deepcopy(pcl.keys())
         toBeChanged = toBeChanged + ks
     elif feedback == "area": 
-        for (k,x,y) in cl.keys():
+        for (k,x,y) in span.keys():
              toBeChanged = toBeChanged + [(l,x1,y1) for l in range(nfeatures) for x1 in range(x,x+filterSize) for y1 in range(y,y+filterSize) if x1 >= 0 and y1 >= 0 and x1 < images.shape[1] and y1 < images.shape[2]]
         toBeChanged = list(set(toBeChanged))
 
@@ -55,15 +59,15 @@ def conv_safety_solve(layer2Consider,nfeatures,nfilters,filters,bias,input,activ
     for (l,x,y) in toBeChanged:
         variable[1,0,l+1,x,y] = Real('1_x_%s_%s_%s' % (l+1,x,y))
         d += 1    
-        if not(bound == [0,0]) and (layer2Consider == 0) and (boundRestriction == True): 
-            pstr = eval("variable[1,0,"+ str (l+1)  + ","+ str(x) +"," + str(y)+ "] <= " + str(bound[1]))
-            pstr = And(eval("variable[1,0,"+ str (l+1)  + ","+ str(x) +"," + str(y)+ "] >= " + str(bound[0])), pstr)
+        if not(boundOfPixelValue == [0,0]) and (layer2Consider == 0) and (boundRestriction == True): 
+            pstr = eval("variable[1,0,"+ str (l+1)  + ","+ str(x) +"," + str(y)+ "] <= " + str(boundOfPixelValue[1]))
+            pstr = And(eval("variable[1,0,"+ str (l+1)  + ","+ str(x) +"," + str(y)+ "] >= " + str(boundOfPixelValue[0])), pstr)
             pstr = And(eval("variable[1,0,"+ str (l+1)  + ","+ str(x) +"," + str(y)+ "] != %s"%(images[l][x][y])), pstr)
 
             s.add(pstr)
             c += 1                
             
-    for (k,x,y) in cl.keys():
+    for (k,x,y) in span.keys():
         variable[1,1,k+1,x,y] = Real('1_y_%s_%s_%s' % (k+1,x,y))
         d += 1
         string = "variable[1,1,"+ str (k+1)  + ","+ str(x) +"," + str(y)+ "] == "
@@ -81,15 +85,15 @@ def conv_safety_solve(layer2Consider,nfeatures,nfilters,filters,bias,input,activ
         c += 1
                     
         if enumerationMethod == "line": 
-            pstr = eval("variable[1,1,"+ str (k+1)  + ","+ str(x) +"," + str(y)+ "] < " + str(activations[k][x][y] + cl[(k,x,y)] * gl[(k,x,y)] + pk))
-            pstr = And(eval("variable[1,1,"+ str (k+1)  + ","+ str(x) +"," + str(y)+ "] > " + str(activations[k][x][y] + cl[(k,x,y)] * gl[(k,x,y)] - pk)), pstr)
+            pstr = eval("variable[1,1,"+ str (k+1)  + ","+ str(x) +"," + str(y)+ "] < " + str(activations[k][x][y] + span[(k,x,y)] * numSpan[(k,x,y)] + pk))
+            pstr = And(eval("variable[1,1,"+ str (k+1)  + ","+ str(x) +"," + str(y)+ "] > " + str(activations[k][x][y] + span[(k,x,y)] * numSpan[(k,x,y)] - pk)), pstr)
         elif enumerationMethod == "convex" or enumerationMethod == "point":
-            if activations[k][x][y] + cl[(k,x,y)] * gl[(k,x,y)] >= 0: 
-                upper = activations[k][x][y] + cl[(k,x,y)] * gl[(k,x,y)] + pk
-                lower = -1 * (activations[k][x][y] + cl[(k,x,y)] * gl[(k,x,y)]) - pk
+            if activations[k][x][y] + span[(k,x,y)] * numSpan[(k,x,y)] >= 0: 
+                upper = activations[k][x][y] + span[(k,x,y)] * numSpan[(k,x,y)] + pk
+                lower = -1 * (activations[k][x][y] + span[(k,x,y)] * numSpan[(k,x,y)]) - pk
             else: 
-                upper = -1 * (activations[k][x][y] + cl[(k,x,y)] * gl[(k,x,y)]) + pk
-                lower = activations[k][x][y] + cl[(k,x,y)] * gl[(k,x,y)] - pk
+                upper = -1 * (activations[k][x][y] + span[(k,x,y)] * numSpan[(k,x,y)]) + pk
+                lower = activations[k][x][y] + span[(k,x,y)] * numSpan[(k,x,y)] - pk
             pstr = eval("variable[1,1,"+ str (k+1)  + ","+ str(x) +"," + str(y)+ "] < " + str(upper))
             pstr = And(eval("variable[1,1,"+ str (k+1)  + ","+ str(x) +"," + str(y)+ "] > " + str(lower)), pstr)
         s.add(pstr)
@@ -123,7 +127,7 @@ def conv_safety_solve(layer2Consider,nfeatures,nfilters,filters,bias,input,activ
             cex = np.squeeze(cex)
             
             #print inputVars
-            #print cl.keys(), pcl.keys()
+            #print span.keys(), pcl.keys()
             #diffs = diffImage(images,cex)
             #print diffs
                 

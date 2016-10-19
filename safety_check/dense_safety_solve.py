@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+author: Xiaowei Huang
+"""
+
 import numpy as np
 import math
 import ast
@@ -18,7 +22,7 @@ from scipy import ndimage
 from configuration import *
 
 
-def dense_safety_solve(nfeatures,nfilters,filters,bias,input,activations,pcl,pgl,cl,gl,pk):  
+def dense_safety_solve(nfeatures,nfilters,filters,bias,input,activations,pcl,pgl,span,numSpan,pk):  
 
     random.seed(time.time())
     rn = random.random()
@@ -41,7 +45,7 @@ def dense_safety_solve(nfeatures,nfilters,filters,bias,input,activations,pcl,pgl
         d += 1
 
                         
-    for k in cl.keys():
+    for k in span.keys():
         variable[1,1,k+1] = Real('1_y_%s' % (k+1))
         d += 1
         string = "variable[1,1,"+ str (k+1)  + "] ==  "

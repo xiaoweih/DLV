@@ -2,6 +2,7 @@
 
 """
 The main file for handling image datasets
+author: Xiaowei Huang
 """
 import sys
 sys.path.append('networks')
@@ -204,7 +205,7 @@ def loadData():
         print("Model loaded!")
 
     
-    return (model,dataset,maxilayer,startIndex)
+    return (model)
 
         
 """

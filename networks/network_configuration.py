@@ -2,6 +2,7 @@
 
 """
 Define paramters
+author: Xiaowei Huang
 """
 import numpy as np
 import os
@@ -23,16 +24,16 @@ def network_parameters(dataset):
     
 #######################################################
 #
-#  Bound for the elements of input 
+#  boundOfPixelValue for the elements of input 
 #
 #######################################################
 
     if dataset in ["mnist","cifar10","imageNet"] : 
-        bound = [0,1]
+        boundOfPixelValue = [0,1]
     elif dataset == "twoDcurve": 
-        bound = [0, 2 * np.pi]
+        boundOfPixelValue = [0, 2 * np.pi]
     else: 
-        bound = [0,0]
+        boundOfPixelValue = [0,0]
 
 #######################################################
 #
@@ -55,8 +56,6 @@ def network_parameters(dataset):
         featureDims = 2
         span = 255/float(255)
         numSpan = 1
-# cp : current precision, i.e., p_k
-        precision = 255/float(255)
     
     elif dataset == "twoDcurve": 
         NN = NN_twoDcurve
@@ -69,8 +68,6 @@ def network_parameters(dataset):
         featureDims = 5
         span = 255/float(255)
         numSpan = 1
-# cp : current precision, i.e., p_k
-        precision = 255/float(255)
 
     elif dataset == "cifar10": 
         NN = NN_cifar10
@@ -83,8 +80,6 @@ def network_parameters(dataset):
         featureDims = 5
         span = 255/float(255)
         numSpan = 1
-# cp : current precision, i.e., p_k
-        precision = 255/float(255)
                 
     elif dataset == "imageNet": 
         NN = NN_imageNet
@@ -97,8 +92,6 @@ def network_parameters(dataset):
         featureDims = 5
         span = 125
         numSpan = 1
-# cp : current precision, i.e., p_k
-        precision = 250
             
 #######################################################
 #
@@ -108,7 +101,7 @@ def network_parameters(dataset):
     
     filterSize = 3 
 
-    return (featureDims,span,numSpan,precision,bound,NN,dataBasics,directory_model_string,directory_statistics_string,directory_pic_string,filterSize)
+    return (featureDims,span,numSpan,boundOfPixelValue,NN,dataBasics,directory_model_string,directory_statistics_string,directory_pic_string,filterSize)
 
 def makedirectory(directory_name):
     if not os.path.exists(directory_name):
