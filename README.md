@@ -1,11 +1,13 @@
 # DLV
 
 
-Note: the project is currently under active development. Please feel free to contact the developer by email: xiaowei.huang@cs.ox.ac.uk. 
+Note: the software is currently under active development. Please feel free to contact the developer by email: xiaowei.huang@cs.ox.ac.uk. 
+
+Together with the software, there are two documents, one is a paper in arXiv and the other is an user document. The user document will be updated from time to time. Please refer to the documents for more details about the software. 
 
 (1) Installation: 
 
-To run the program, you need to install the following packages: 
+To run the program, one needs to install the following packages: 
 
 Python 2.7
 Theano
@@ -23,7 +25,7 @@ Use the following command to call the program:
 
            python main.py
 
-Please use the file ''configuration.py'' to set the parameters for the system to run. More instructions on how to adapt the parameters will come soon. 
+Please use the file ''configuration.py'' to set the parameters for the system to run. 
 
 
 Xiaowei Huang
