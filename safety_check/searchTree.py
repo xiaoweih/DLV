@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 """
+A data structure for organising search
+
 author: Xiaowei Huang
 """
 

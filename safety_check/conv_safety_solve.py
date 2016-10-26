@@ -44,13 +44,13 @@ def conv_safety_solve(layer2Consider,nfeatures,nfilters,filters,bias,input,activ
     #print("%s\n%s\n%s\n%s"%(pcl,pgl,span,numSpan))
     
     toBeChanged = []
-    if feedback == "point": 
+    if inverseFunction == "point": 
         if nfeatures == 1: 
             #print("%s\n%s"%(nfeatures,pcl.keys()))
             ks = [ (0,x,y) for (x,y) in pcl.keys() ]
         else: ks = copy.deepcopy(pcl.keys())
         toBeChanged = toBeChanged + ks
-    elif feedback == "area": 
+    elif inverseFunction == "area": 
         for (k,x,y) in span.keys():
              toBeChanged = toBeChanged + [(l,x1,y1) for l in range(nfeatures) for x1 in range(x,x+filterSize) for y1 in range(y,y+filterSize) if x1 >= 0 and y1 >= 0 and x1 < images.shape[1] and y1 < images.shape[2]]
         toBeChanged = list(set(toBeChanged))

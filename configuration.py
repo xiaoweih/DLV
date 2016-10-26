@@ -27,14 +27,14 @@ task = "safety_check"
 
 # which dataset to work with
 #dataset = "twoDcurve"
-dataset = "mnist"
-#dataset = "cifar10"
+#dataset = "mnist"
+dataset = "cifar10"
 #dataset = "imageNet"
 
-# decide whether to take a usual configuration
+# decide whether to take an experimental configuration
 # for specific dataset
-take_usual_config = True
-#take_usual_config = False
+experimental_config = True
+#experimental_config = False
 
 # the network is trained from scratch
 #  or read from the saved files
@@ -53,7 +53,7 @@ dataProcessingBatchNum = 200
 #######################################################
 
 span = 255/float(255)   # s_p in the paper
-numSpan = 0.5           # m_p in the paper
+numSpan = 1.0          # m_p in the paper
 featureDims = 5         # dims_{k,f} in the paper
 
 # error bounds, defaulted to be 1.0
@@ -71,7 +71,7 @@ errorBounds[-1] = 1.0
 #######################################################
 #
 #  2. The following are parameters for safety checking
-#     only useful only when take_usual_config = False
+#     only useful only when experimental_config = False
 #
 #######################################################
 
@@ -90,8 +90,8 @@ maxLayer = 0
 numOfFeatures = 40
 
 # use linear restrictions or conv filter restriction
-feedback = "point"
-#feedback = "area"
+inverseFunction = "point"
+#inverseFunction = "area"
 
 # point-based or line-based, or only work with a specific point
 enumerationMethod = "convex"
@@ -122,11 +122,11 @@ tempFile = "disabled"
 
 
 #######################################################
-#  get parameters for the case when take_usual_config = True
+#  get parameters for the case when experimental_config = True
 #######################################################
 
-if take_usual_config == True: 
-    (startIndexOfImage,startLayer, maxLayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile) = usual_configuration(dataset)
+if experimental_config == True: 
+    (startIndexOfImage,startLayer, maxLayer,numOfFeatures,inverseFunction,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile) = usual_configuration(dataset)
     
 
 ############################################################

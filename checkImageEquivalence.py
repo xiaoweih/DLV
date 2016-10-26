@@ -10,6 +10,7 @@ sys.path.append('networks')
 sys.path.append('safety_check')
 sys.path.append('configuration')
 
+import math
 import time
 import numpy as np
 import copy 
@@ -23,13 +24,13 @@ def main():
 
 
     #dataset = "twoDcurve"
-    #dataset = "mnist"
-    dataset = "cifar10"
+    dataset = "mnist"
+    #dataset = "cifar10"
     #dataset = "imageNet"
     
 
-    filename1 = "197_original_as_ship_with_confidence_0.990640580654.png"
-    filename2 = "temp0_(round=32).png"
+    filename1 = "2442_original_as_7_with_confidence_0.999989330769.png"
+    filename2 = "2442_7_modified_into_3_with_confidence_0.402579039335.png"
 
     imageNetPath1 = "%s/%s"%(directory_pic_string,filename1)
     imageNetPath2 = "%s/%s"%(directory_pic_string,filename2)
@@ -37,10 +38,11 @@ def main():
     image1 = NN.readImage(imageNetPath1)
     image2 = NN.readImage(imageNetPath2)
     
-    k = diffImage(image1,image2)
+    k,euclideanDistance = diffImage(image1,image2)
     print "%s input elements are changed."%(k)
+    print ("The Euclidean distance is %s"%(euclideanDistance))
     
-    (model,dataset,maxLayer,startIndexOfImage) = loadData()
+    model = loadData()
 
     (class1,confidence1) = NN.predictWithImage(model,image1)
     classStr1 = dataBasics.LABELS(int(class1))
@@ -54,17 +56,20 @@ def main():
     
     
 def diffImage(image1,image2):
+    euclideanDistance = 0
     k = 0
     if len(image1.shape) == 1: 
         for x in range(len(image1)):
                 if image1[x] != image2[x]: 
                     k += 1
+                    euclideanDistance += (image1[x] - image2[x]) ** 2
                     print("dimension %s is changed from %s to %s"%(x,image1[x],image2[x]))
     elif len(image1.shape) == 2:
         for x in range(len(image1)):
             for y in range(len(image1[0])):
                 if image1[x][y] != image2[x][y]: 
                     k += 1
+                    euclideanDistance += (image1[x][y] - image2[x][y]) ** 2
                     print("dimension (%s,%s) is changed from %s to %s"%(x,y,image1[x][y],image2[x][y]))
     elif len(image1.shape) == 3:
         for x in range(len(image1)):
@@ -72,8 +77,10 @@ def diffImage(image1,image2):
                 for z in range(len(image1[0][0])):
                     if image1[x][y][z] != image2[x][y][z]: 
                         k += 1
+                        euclideanDistance += (image1[x][y][z] - image2[x][y][z]) ** 2
                         print("dimension (%s,%s,%s) is changed from %s to %s"%(x,y,z,image1[x][y][z],image2[x][y][z]))
-    return k
+    euclideanDistance = math.sqrt(euclideanDistance)
+    return k,euclideanDistance
 
 def makedirectory(directory_name):
     if not os.path.exists(directory_name):

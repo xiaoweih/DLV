@@ -139,7 +139,15 @@ def getImage(model,n_in_tests):
     image = X_test[n_in_tests:n_in_tests+1]
     return np.squeeze(image)
     
+def readImage(path):
+
+    import cv2
     
+    im = cv2.resize(cv2.imread(path), (img_rows, img_cols)).astype('float32')
+    im = im / 255
+    im = im.transpose(2, 0, 1)
+    
+    return np.squeeze(im)
 
 def getActivationValue(model,layer,image):
 

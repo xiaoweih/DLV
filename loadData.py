@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
 """
-The main file for handling image datasets
+The main file for load models 
+
 author: Xiaowei Huang
 """
+
 import sys
 sys.path.append('networks')
 sys.path.append('safety_check')

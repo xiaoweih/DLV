@@ -57,7 +57,7 @@ def conv_region_solve(nfeatures,nfilters,filters,bias,activations0,activations1,
         span = copy.deepcopy(cl2)
         numSpan = copy.deepcopy(gl2)
 
-    if feedback == "area" :
+    if inverseFunction == "area" :
         inds = [(k,x-x1,y-y1) for k in range(nfilters) for (l,x,y) in span.keys() for x1 in range(filterSize) for y1 in range(filterSize) if x-x1 >= 0 and y-y1 >= 0 and x-x1 < activations1.shape[1] and y-y1 < activations1.shape[2] ]
 
     nextSpan = {}

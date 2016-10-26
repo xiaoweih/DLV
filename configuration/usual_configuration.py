@@ -24,8 +24,8 @@ def usual_configuration(dataset):
         numOfFeatures = 0
 
         # use linear restrictions or conv filter restriction
-        feedback = "point"
-        #feedback = "area"
+        inverseFunction = "point"
+        #inverseFunction = "area"
 
         # point-based or line-based, or only work with a specific point
         #enumerationMethod = "convex"
@@ -53,13 +53,13 @@ def usual_configuration(dataset):
         # compute the derivatives up to a specific layer
         derivativelayerUpTo = 3
 
-        return (startIndexOfImage,startLayer,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
+        return (startIndexOfImage,startLayer,maxilayer,numOfFeatures,inverseFunction,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
         
     elif dataset == "mnist": 
 
         # which image to start with or work with 
         # from the database
-        startIndexOfImage = 2438
+        startIndexOfImage = 2442
         
         # the start layer to work from 
         startLayer = 0
@@ -68,11 +68,11 @@ def usual_configuration(dataset):
         maxilayer = 0
 
         ## number of features of each layer 
-        numOfFeatures = 1000
+        numOfFeatures = 150
 
         # use linear restrictions or conv filter restriction
-        feedback = "point"
-        #feedback = "area"
+        inverseFunction = "point"
+        #inverseFunction = "area"
 
         # point-based or line-based, or only work with a specific point
         enumerationMethod = "convex"
@@ -100,13 +100,13 @@ def usual_configuration(dataset):
         # compute the derivatives up to a specific layer
         derivativelayerUpTo = 3
     
-        return (startIndexOfImage,startLayer,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
+        return (startIndexOfImage,startLayer,maxilayer,numOfFeatures,inverseFunction,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
         
     elif dataset == "cifar10": 
     
         # which image to start with or work with 
         # from the database
-        startIndexOfImage = 330
+        startIndexOfImage = 331
         
         # the start layer to work from 
         startLayer = 0
@@ -115,11 +115,11 @@ def usual_configuration(dataset):
         maxilayer = 0
 
         ## number of features of each layer 
-        numOfFeatures = 1000
+        numOfFeatures = 500
 
         # use linear restrictions or conv filter restriction
-        feedback = "point"
-        #feedback = "area"
+        inverseFunction = "point"
+        #inverseFunction = "area"
 
         # point-based or line-based, or only work with a specific point
         enumerationMethod = "convex"
@@ -147,7 +147,7 @@ def usual_configuration(dataset):
         # compute the derivatives up to a specific layer
         derivativelayerUpTo = 5
     
-        return (startIndexOfImage,startLayer,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
+        return (startIndexOfImage,startLayer,maxilayer,numOfFeatures,inverseFunction,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
 
     elif dataset == "imageNet": 
     
@@ -165,8 +165,8 @@ def usual_configuration(dataset):
         numOfFeatures = 20000
 
         # use linear restrictions or conv filter restriction
-        feedback = "point"
-        #feedback = "area"
+        inverseFunction = "point"
+        #inverseFunction = "area"
 
         # point-based or line-based, or only work with a specific point
         enumerationMethod = "convex"
@@ -196,4 +196,4 @@ def usual_configuration(dataset):
         # compute the derivatives up to a specific layer
         derivativelayerUpTo = 5
     
-        return (startIndexOfImage,startLayer,maxilayer,numOfFeatures,feedback,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
+        return (startIndexOfImage,startLayer,maxilayer,numOfFeatures,inverseFunction,enumerationMethod,heuristics,repeatedManipulation,checkingMode,exitWhen,derivativelayerUpTo,tempFile)
