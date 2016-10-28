@@ -32,7 +32,7 @@ from configuration import *
 def safety_analysis(model,dataset,layer2Consider,imageIndex,st,index,cl2,gl2,cp):
 
     originalIndex = copy.deepcopy(index)
-    (originalImage,pcl,pgl,numDimsToMani) = st.getInfo(index)
+    (originalImage,prevSpan,prevNumSpan,numDimsToMani) = st.getInfo(index)
     howfar = st.getHowFar(index[0],0)
     
     config = NN.getConfig(model)
@@ -44,9 +44,9 @@ def safety_analysis(model,dataset,layer2Consider,imageIndex,st,index,cl2,gl2,cp)
     originalLayer2Consider = copy.deepcopy(layer2Consider)
     
     # predict with neural network
-    (originalClass,originalConfident) = NN.predictWithImage(model,originalImage)
+    (originalSpanass,originalConfident) = NN.predictWithImage(model,originalImage)
 
-    classstr = "the right class is " + (str(dataBasics.LABELS(int(originalClass))))
+    classstr = "the right class is " + (str(dataBasics.LABELS(int(originalSpanass))))
     print classstr
     classstr = "the confidence is " + (str(originalConfident))
     print classstr
@@ -72,8 +72,8 @@ def safety_analysis(model,dataset,layer2Consider,imageIndex,st,index,cl2,gl2,cp)
     #(span,numSpan) = decideNewP(cl2,gl2,cp)
     #print "the numbers of spans are updated into %s ... "%(numSpan)
     
-    originalcl = copy.deepcopy(span)
-    originalgl = copy.deepcopy(numSpan)
+    originalSpan = copy.deepcopy(span)
+    originalNumSpan = copy.deepcopy(numSpan)
     if enumerationMethod == "convex": 
         allRounds = reduce(mul,map(lambda x: 2, numSpan.values()),1)
     elif enumerationMethod == "line": 
@@ -82,11 +82,11 @@ def safety_analysis(model,dataset,layer2Consider,imageIndex,st,index,cl2,gl2,cp)
         allRounds = 1
     print "%s regions need to be checked. "%(allRounds)
     
-    # counter_gl tracks the working point 
-    # igl remembers 
-    (counter_gl,igl) = initialiseCounter(numSpan)
-    counter_gls = {}   
-    counter_gls[originalLayer2Consider] = counter_gl 
+    # counter_numSpan tracks the working point 
+    # InitialisedNumSpan remembers 
+    (counter_numSpan,InitialisedNumSpan) = initialiseCounter(numSpan)
+    counter_numSpans = {}   
+    counter_numSpans[originalLayer2Consider] = counter_numSpan 
     round = 0
 
     cond = False
@@ -99,12 +99,12 @@ def safety_analysis(model,dataset,layer2Consider,imageIndex,st,index,cl2,gl2,cp)
     
         if layer2Consider == originalLayer2Consider: 
             activations = NN.getActivationValue(model,originalLayer2Consider,originalImage)
-            activations1 = imageFromGL(activations,counter_gl,span)
-            cond = equalCounters(counter_gl,numSpan)
+            activations1 = imageFromGL(activations,counter_numSpan,span)
+            cond = equalCounters(counter_numSpan,numSpan)
             
         nprint("\nin round: %s / %s"%(round, allRounds))
         nprint("layer: " + str(layer2Consider))
-        nprint("point %s"%(counter_gl))
+        nprint("point %s"%(counter_numSpan))
         #print "maximal point %s"%(numSpan)
         #print "activations1=%s"%(activations1)
 
@@ -125,16 +125,16 @@ def safety_analysis(model,dataset,layer2Consider,imageIndex,st,index,cl2,gl2,cp)
             if layer2Consider == 0 : 
                 activations0 = copy.deepcopy(originalImage)
             else: activations0 = NN.getActivationValue(model,layer2Consider-1,originalImage)
-            string = directory_pic_string+"/"+str(imageIndex)+"_original_as_"+str(originalClass)
-            (bl,newInput) = conv_solve_prep(model,dataBasics,string,originalLayer2Consider,layer2Consider,pcl,pgl,span,numSpan,cp,activations0,wv2Consider,bv2Consider,activations1)
+            string = directory_pic_string+"/"+str(imageIndex)+"_original_as_"+str(originalSpanass)
+            (bl,newInput) = conv_solve_prep(model,dataBasics,string,originalLayer2Consider,layer2Consider,prevSpan,prevNumSpan,span,numSpan,cp,activations0,wv2Consider,bv2Consider,activations1)
             
         elif layerType == "Dense":  
             nprint("dense layer, back propogation ... ")
             if layer2Consider == 0 : 
                 activations0 = copy.deepcopy(originalImage)
             else: activations0 = NN.getActivationValue(model,layer2Consider-1,originalImage)
-            string = directory_pic_string+"/"+str(imageIndex)+"_original_as_"+str(originalClass)
-            (bl,newInput) = dense_solve_prep(model,dataBasics,string,pcl,pgl,span,numSpan,cp,activations0,wv2Consider,bv2Consider,activations1)
+            string = directory_pic_string+"/"+str(imageIndex)+"_original_as_"+str(originalSpanass)
+            (bl,newInput) = dense_solve_prep(model,dataBasics,string,prevSpan,prevNumSpan,span,numSpan,cp,activations0,wv2Consider,bv2Consider,activations1)
             
         elif layerType == "InputLayer":
             nprint("inputLayer layer, back-propagating ... ")
@@ -171,13 +171,13 @@ def safety_analysis(model,dataset,layer2Consider,imageIndex,st,index,cl2,gl2,cp)
             nprint("back-propagation or solving fails ...")
             layer2Consider = copy.deepcopy(originalLayer2Consider)
             index = copy.deepcopy(originalIndex)
-            (image,pcl,pgl,numDimsToMani) = st.getInfo(originalIndex)
-            counter_gl = counter_gls[originalLayer2Consider]
-            span = copy.deepcopy(originalcl)
-            numSpan = copy.deepcopy(originalgl)
-            (_,igl) = initialiseCounter(numSpan)
-            counter_gl = counterPlusOne(counter_gl,numSpan,igl)    
-            counter_gls[originalLayer2Consider] = copy.deepcopy(counter_gl)      
+            (image,prevSpan,prevNumSpan,numDimsToMani) = st.getInfo(originalIndex)
+            counter_numSpan = counter_numSpans[originalLayer2Consider]
+            span = copy.deepcopy(originalSpan)
+            numSpan = copy.deepcopy(originalNumSpan)
+            (_,InitialisedNumSpan) = initialiseCounter(numSpan)
+            counter_numSpan = counterPlusOne(counter_numSpan,numSpan,InitialisedNumSpan)    
+            counter_numSpans[originalLayer2Consider] = copy.deepcopy(counter_numSpan)      
             round += 1
                 
         elif layer2Consider > 0:       
@@ -188,12 +188,11 @@ def safety_analysis(model,dataset,layer2Consider,imageIndex,st,index,cl2,gl2,cp)
             index = st.parentIndex(index)
             nprint("backtrack to index %s in layer %s"%(index,layer2Consider))
             activations = NN.getActivationValue(model,layer2Consider,originalImage)
-            counter_gl = getCounter(activations,newInput,pcl,pgl)
-            span = copy.deepcopy(pcl)
-            numSpan = copy.deepcopy(pgl)
-            cp = copy.deepcopy(pcp)
-            (image,pcl,pgl,numDimsToMani) = st.getInfo(index)
-            counter_gls[layer2Consider] = copy.deepcopy(counter_gl)
+            counter_numSpan = getCounter(activations,newInput,prevSpan,prevNumSpan)
+            span = copy.deepcopy(prevSpan)
+            numSpan = copy.deepcopy(prevNumSpan)
+            (image,prevSpan,prevNumSpan,numDimsToMani) = st.getInfo(index)
+            counter_numSpans[layer2Consider] = copy.deepcopy(counter_numSpan)
                  
         elif withinRegion(newInput, st) == True:         
             # reached the input layer
@@ -204,7 +203,7 @@ def safety_analysis(model,dataset,layer2Consider,imageIndex,st,index,cl2,gl2,cp)
             
             if dataset == "imageNet": newInput = normalise(newInput)
             
-            nprint("counter: %s"%counter_gls[originalLayer2Consider])
+            nprint("counter: %s"%counter_numSpans[originalLayer2Consider])
             nprint("input: %s"%newInput)
 
 
@@ -213,9 +212,9 @@ def safety_analysis(model,dataset,layer2Consider,imageIndex,st,index,cl2,gl2,cp)
 
             nprint("confident level: " + str(confident))
             # Great! we found an image which has different class with the original image
-            if newClass != originalClass: 
+            if newClass != originalSpanass: 
                 newClassStr = dataBasics.LABELS(int(newClass))
-                origClassStr = dataBasics.LABELS(int(originalClass))
+                origClassStr = dataBasics.LABELS(int(originalSpanass))
                 classstr = "Class changed! from " + str(origClassStr) +" into " + str(newClassStr)
                 print classstr
 
@@ -236,18 +235,18 @@ def safety_analysis(model,dataset,layer2Consider,imageIndex,st,index,cl2,gl2,cp)
                 #    diffImage(originalImage,newInput)
                 if rkupdated == False: 
                     rk = [(newInput,confident)]
-                    if counter_gl == numSpan: 
+                    if counter_numSpan == numSpan: 
                         rkupdated = True
                         
             layer2Consider = copy.deepcopy(originalLayer2Consider)
             index = copy.deepcopy(originalIndex)
-            (image,pcl,pgl,numDimsToMani) = st.getInfo(originalIndex)
-            counter_gl = counter_gls[originalLayer2Consider]
-            span = copy.deepcopy(originalcl)
-            numSpan = copy.deepcopy(originalgl)
-            (_,igl) = initialiseCounter(numSpan)
-            counter_gl = counterPlusOne(counter_gl,numSpan,igl)    
-            counter_gls[originalLayer2Consider] = copy.deepcopy(counter_gl)      
+            (image,prevSpan,prevNumSpan,numDimsToMani) = st.getInfo(originalIndex)
+            counter_numSpan = counter_numSpans[originalLayer2Consider]
+            span = copy.deepcopy(originalSpan)
+            numSpan = copy.deepcopy(originalNumSpan)
+            (_,InitialisedNumSpan) = initialiseCounter(numSpan)
+            counter_numSpan = counterPlusOne(counter_numSpan,numSpan,InitialisedNumSpan)    
+            counter_numSpans[originalLayer2Consider] = copy.deepcopy(counter_numSpan)      
             
             round += 1
             rn += 1
@@ -259,13 +258,13 @@ def safety_analysis(model,dataset,layer2Consider,imageIndex,st,index,cl2,gl2,cp)
             rs += 1   
             layer2Consider = copy.deepcopy(originalLayer2Consider)
             index = copy.deepcopy(originalIndex)
-            (image,pcl,pgl,numDimsToMani) = st.getInfo(originalIndex)
-            counter_gl = counter_gls[originalLayer2Consider]
-            span = copy.deepcopy(originalcl)
-            numSpan = copy.deepcopy(originalgl)
-            (_,igl) = initialiseCounter(numSpan)
-            counter_gl = counterPlusOne(counter_gl,numSpan,igl)    
-            counter_gls[originalLayer2Consider] = copy.deepcopy(counter_gl)      
+            (image,prevSpan,prevNumSpan,numDimsToMani) = st.getInfo(originalIndex)
+            counter_numSpan = counter_numSpans[originalLayer2Consider]
+            span = copy.deepcopy(originalSpan)
+            numSpan = copy.deepcopy(originalNumSpan)
+            (_,InitialisedNumSpan) = initialiseCounter(numSpan)
+            counter_numSpan = counterPlusOne(counter_numSpan,numSpan,InitialisedNumSpan)    
+            counter_numSpans[originalLayer2Consider] = copy.deepcopy(counter_numSpan)      
             
             round += 1
 
@@ -336,7 +335,7 @@ def normalise(image):
 #
 ##########################################################################
 
-def conv_solve_prep(model,dataBasics,string,originalLayer2Consider,layer2Consider,pcl,pgl,span,numSpan,cp,input,wv,bv,activations):
+def conv_solve_prep(model,dataBasics,string,originalLayer2Consider,layer2Consider,prevSpan,prevNumSpan,span,numSpan,cp,input,wv,bv,activations):
 
     # filters can be seen as the output of a convolutional layer
     nfilters = numberOfFilters(wv)
@@ -366,12 +365,12 @@ def conv_solve_prep(model,dataBasics,string,originalLayer2Consider,layer2Conside
     input2 = copy.deepcopy(input)
     
     if originalLayer2Consider > layer2Consider: 
-        (bl1,newInput) = conv_safety_solve(layer2Consider,nfeatures,nfilters,filterCollection,biasCollection,input,activations,pcl,pgl,span,numSpan,cp)
+        (bl1,newInput) = conv_safety_solve(layer2Consider,nfeatures,nfilters,filterCollection,biasCollection,input,activations,prevSpan,prevNumSpan,span,numSpan,cp)
     else: 
         #global enumerationMethod
         #enumerationMethodTemp = copy.deepcopy(enumerationMethod)
         #enumerationMethod = "point"
-        (bl1,newInput) = conv_safety_solve(layer2Consider,nfeatures,nfilters,filterCollection,biasCollection,input,activations,pcl,pgl,span,numSpan,cp)
+        (bl1,newInput) = conv_safety_solve(layer2Consider,nfeatures,nfilters,filterCollection,biasCollection,input,activations,prevSpan,prevNumSpan,span,numSpan,cp)
         #enumerationMethod = copy.deepcopy(enumerationMethodTemp)
         
     #dataBasics.save(input2, string+"_"+str(point)+".png")
@@ -386,7 +385,7 @@ def conv_solve_prep(model,dataBasics,string,originalLayer2Consider,layer2Conside
 #
 #####################################################################################
 
-def dense_solve_prep(model,dataBasics,string,pcl,pgl,span,numSpan,cp,input,wv,bv,activations):
+def dense_solve_prep(model,dataBasics,string,prevSpan,prevNumSpan,span,numSpan,cp,input,wv,bv,activations):
 
     # filters can be seen as the output of a convolutional layer
     nfilters = numberOfFilters(wv)
@@ -405,7 +404,7 @@ def dense_solve_prep(model,dataBasics,string,pcl,pgl,span,numSpan,cp,input,wv,bv
             for l in range(nfeatures): 
                 biasCollection[l,c-1] = w
    
-    (bl1,newInput) = dense_safety_solve(nfeatures,nfilters,filterCollection,biasCollection,input,activations,pcl,pgl,span,numSpan,cp)
+    (bl1,newInput) = dense_safety_solve(nfeatures,nfilters,filterCollection,biasCollection,input,activations,prevSpan,prevNumSpan,span,numSpan,cp)
         
     nprint("completed a round of processing ")
     return (bl1,newInput)
@@ -418,51 +417,51 @@ def dense_solve_prep(model,dataBasics,string,pcl,pgl,span,numSpan,cp,input,wv,bv
 #
 ##########################################################################
 
-def counterPlusOne(counter_gl,numSpan,igl):
+def counterPlusOne(counter_numSpan,numSpan,InitialisedNumSpan):
 
     if enumerationMethod == "line": 
-        return counterPlusOne0(counter_gl,numSpan,igl)
+        return counterPlusOne0(counter_numSpan,numSpan,InitialisedNumSpan)
     elif enumerationMethod == "convex": 
-        return counterPlusOne1(counter_gl,numSpan,igl)
+        return counterPlusOne1(counter_numSpan,numSpan,InitialisedNumSpan)
     elif enumerationMethod == "point": 
         return numSpan
 
 ## explore outmost spaces 
 
-def counterPlusOne1(counter_gl,numSpan,igl): 
+def counterPlusOne1(counter_numSpan,numSpan,InitialisedNumSpan): 
 
     j = -1    
-    ncounter_gl = copy.deepcopy(counter_gl)
-    for (i, p) in igl.iteritems(): 
-        if counter_gl[p] < numSpan[p]: 
+    ncounter_numSpan = copy.deepcopy(counter_numSpan)
+    for (i, p) in InitialisedNumSpan.iteritems(): 
+        if counter_numSpan[p] < numSpan[p]: 
             j = p 
             break
         else: 
-            ncounter_gl[p] = - numSpan[p]
+            ncounter_numSpan[p] = - numSpan[p]
     if j == -1 : 
-        ncounter_gl = copy.deepcopy(numSpan)
+        ncounter_numSpan = copy.deepcopy(numSpan)
     else: 
-        ncounter_gl[j] = numSpan[p]
-    return ncounter_gl
+        ncounter_numSpan[j] = numSpan[p]
+    return ncounter_numSpan
 
 
 ## explore all possible points in the space
 
-def counterPlusOne0(counter_gl,numSpan,igl): 
+def counterPlusOne0(counter_numSpan,numSpan,InitialisedNumSpan): 
 
     j = -1    
-    ncounter_gl = copy.deepcopy(counter_gl)
-    for (i, p) in igl.iteritems(): 
-        if counter_gl[p] < numSpan[p]: 
+    ncounter_numSpan = copy.deepcopy(counter_numSpan)
+    for (i, p) in InitialisedNumSpan.iteritems(): 
+        if counter_numSpan[p] < numSpan[p]: 
             j = p 
             break
         else: 
-            ncounter_gl[p] = - numSpan[p]
+            ncounter_numSpan[p] = - numSpan[p]
     if j == -1 : 
-        ncounter_gl = copy.deepcopy(numSpan)
+        ncounter_numSpan = copy.deepcopy(numSpan)
     else: 
-        ncounter_gl[j] = counter_gl[j] + 1
-    return ncounter_gl
+        ncounter_numSpan[j] = counter_numSpan[j] + 1
+    return ncounter_numSpan
 
 
 ############################################################################
@@ -475,9 +474,9 @@ def counterPlusOne0(counter_gl,numSpan,igl):
 def imageSize(image):
     return len(image[0])
 
-def imageFromGL(image,counter_gl,span):
+def imageFromGL(image,counter_numSpan,span):
     nimage = copy.deepcopy(image)
-    for (p, c) in counter_gl.iteritems():
+    for (p, c) in counter_numSpan.iteritems():
         nimage[p] = image[p] + c * span[p]
     return nimage    
 
@@ -499,14 +498,14 @@ def decideNewP(span,numSpan,cp):
     return (nextSpan,nextNumSpan)
     
 def initialiseCounter(numSpan):
-    counter_gl = {}
-    igl = {}
+    counter_numSpan = {}
+    InitialisedNumSpan = {}
     j = 0
     for i in numSpan.keys(): 
-        counter_gl[i] = - numSpan[i]
-        igl[j] = i
+        counter_numSpan[i] = - numSpan[i]
+        InitialisedNumSpan[j] = i
         j += 1
-    return (counter_gl,igl)
+    return (counter_numSpan,InitialisedNumSpan)
     
     
 def getCounter(activations,newInput,span,numSpan): 

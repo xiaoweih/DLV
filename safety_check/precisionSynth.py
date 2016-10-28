@@ -18,7 +18,9 @@ from networkBasics import *
 from configuration import * 
 from basics import *
 
-
+"""
+The following is an overapproximation
+"""
 
 def precisionSynth(layer2Consider,nextSpan,nextNumSpan):
 

@@ -2,6 +2,7 @@
 
 
 import numpy as np
+import math
 import time
 import os
 import copy
@@ -57,6 +58,28 @@ def diffImage(image1,image2):
                diffnum += 1
                elts[diffnum] = x
     return elts
+    
+    
+def euclideanDistance(image1,image2):
+    distance = 0
+    if len(image1.shape) == 2:
+        for x in range(len(image1)):
+            for y in range(len(image1[0])):
+                if image1[x][y] != image2[x][y]: 
+                    distance += (image1[x][y] - image2[x][y]) ** 2
+    elif len(image1.shape) == 3:
+        for x in range(len(image1)):
+            for y in range(len(image1[0])):
+               for z in range(len(image1[0][0])):
+                  if image1[x][y][z] != image2[x][y][z]: 
+                     distance += (image1[x][y][z] - image2[x][y][z]) ** 2
+
+    elif len(image1.shape) == 1:
+        for x in range(len(image1)):
+            if image1[x] != image2[x]: 
+                distance += (image1[x] - image2[x]) ** 2
+
+    return math.sqrt(distance)
 
 def normalisation(y):
     for k in range(len(y)): 

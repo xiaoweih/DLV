@@ -53,9 +53,11 @@ def network_parameters(dataset):
         directory_pic_string = makedirectory("data/mnist_pic")
         
 # ce: the region definition for layer 0, i.e., e_0
-        featureDims = 2
+        featureDims = 5
         span = 255/float(255)
         numSpan = 1
+        errorBounds = {}
+        errorBounds[-1] = 1.0
     
     elif dataset == "twoDcurve": 
         NN = NN_twoDcurve
@@ -65,9 +67,11 @@ def network_parameters(dataset):
         directory_pic_string = makedirectory("data/twoDcurve_pic")
 
 # ce: the region definition for layer 0, i.e., e_0
-        featureDims = 5
+        featureDims = 2
         span = 255/float(255)
         numSpan = 1
+        errorBounds = {}
+        errorBounds[-1] = 1.0
 
     elif dataset == "cifar10": 
         NN = NN_cifar10
@@ -80,6 +84,8 @@ def network_parameters(dataset):
         featureDims = 5
         span = 255/float(255)
         numSpan = 1
+        errorBounds = {}
+        errorBounds[-1] = 1.0
                 
     elif dataset == "imageNet": 
         NN = NN_imageNet
@@ -92,6 +98,8 @@ def network_parameters(dataset):
         featureDims = 5
         span = 125
         numSpan = 1
+        errorBounds = {}
+        errorBounds[-1] = 125
             
 #######################################################
 #
@@ -101,7 +109,7 @@ def network_parameters(dataset):
     
     filterSize = 3 
 
-    return (featureDims,span,numSpan,boundOfPixelValue,NN,dataBasics,directory_model_string,directory_statistics_string,directory_pic_string,filterSize)
+    return (featureDims,span,numSpan,errorBounds,boundOfPixelValue,NN,dataBasics,directory_model_string,directory_statistics_string,directory_pic_string,filterSize)
 
 def makedirectory(directory_name):
     if not os.path.exists(directory_name):

@@ -21,8 +21,9 @@ class dataCollection:
     def __init__(self):
         self.runningTime = {}
         self.manipulationPercentage = {}
+        self.euclideanDistance = {}
         self.confidence = {}
-        self.fileHandler = open(self.fileName, 'a')
+        self.fileHandler = open(self.fileName, 'w')
         
     def initialiseIndex(self, index):
         self.index = index
@@ -38,14 +39,21 @@ class dataCollection:
         
     def addManipulationPercentage(self, mp):
         self.manipulationPercentage[self.index,self.layer] = mp
+        
+    def addEuclideanDistance(self, eudist):
+        self.euclideanDistance[self.index,self.layer] = eudist
 
-    def outputOneSample(self): 
+    def provideDetails(self): 
         self.fileHandler.write("running time: \n")
         for i,r in self.runningTime.iteritems():
             self.fileHandler.write("%s:%s\n"%(i,r))
             
         self.fileHandler.write("manipulation percentage: \n")
         for i,r in self.manipulationPercentage.iteritems():
+            self.fileHandler.write("%s:%s\n"%(i,r))
+            
+        self.fileHandler.write("Euclidean distance: \n")
+        for i,r in self.euclideanDistance.iteritems():
             self.fileHandler.write("%s:%s\n"%(i,r))
             
         self.fileHandler.write("confidence: \n")
@@ -58,6 +66,8 @@ class dataCollection:
         self.fileHandler.write("average running time: %s\n"%(art))
         amp = sum(self.manipulationPercentage.values()) / len(self.manipulationPercentage.values())
         self.fileHandler.write("average manipulation percentage: %s\n"%(amp))
+        eudist = sum(self.euclideanDistance.values()) / len(self.euclideanDistance.values())
+        self.fileHandler.write("average euclidean distance: %s\n"%(eudist))
 
     def close(self):
         self.fileHandler.close()

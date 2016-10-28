@@ -42,9 +42,9 @@ whichMode = "read"
 #whichMode = "train"
 
 # work with a single image or a batch of images 
-dataProcessing = "single"
-#dataProcessing = "batch"
-dataProcessingBatchNum = 200
+#dataProcessing = "single"
+dataProcessing = "batch"
+dataProcessingBatchNum = 3
 
 #######################################################
 #
@@ -65,7 +65,7 @@ errorBounds[-1] = 1.0
 #  get parameters from network_configuration
 #######################################################
 
-(featureDims,span,numSpan,boundOfPixelValue,NN,dataBasics,directory_model_string,directory_statistics_string,directory_pic_string,filterSize) = network_parameters(dataset)
+(featureDims,span,numSpan,errorBounds,boundOfPixelValue,NN,dataBasics,directory_model_string,directory_statistics_string,directory_pic_string,filterSize) = network_parameters(dataset)
 
 
 #######################################################
@@ -83,7 +83,7 @@ startIndexOfImage = 197
 startLayer = 0
 
 # the maximal layer to work until 
-maxLayer = 0
+maxLayer = 3
 
 ## number of features of each layer 
 # in the paper, dims_L = numOfFeatures * featureDims

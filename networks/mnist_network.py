@@ -4,6 +4,9 @@ from __future__ import print_function
 
 import scipy.io as sio
 import numpy as np
+import struct
+from array import array as pyarray
+from PIL import Image
 
 from keras.models import model_from_json
 from keras.models import Sequential
@@ -142,10 +145,14 @@ def getImage(model,n_in_tests):
 def readImage(path):
 
     import cv2
-    
+
     im = cv2.resize(cv2.imread(path), (img_rows, img_cols)).astype('float32')
     im = im / 255
-    im = im.transpose(2, 0, 1)
+    #im = im.transpose(2, 0, 1)
+
+    print("ERROR: currently the reading of MNIST images are not correct, so the classifications are incorrect. ")
+    
+
     
     return np.squeeze(im)
 

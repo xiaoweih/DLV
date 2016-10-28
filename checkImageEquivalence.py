@@ -30,7 +30,7 @@ def main():
     
 
     filename1 = "2442_original_as_7_with_confidence_0.999989330769.png"
-    filename2 = "2442_7_modified_into_3_with_confidence_0.402579039335.png"
+    filename2 = "2442_7_modified_into_3_with_confidence_0.509171962738.png"
 
     imageNetPath1 = "%s/%s"%(directory_pic_string,filename1)
     imageNetPath2 = "%s/%s"%(directory_pic_string,filename2)

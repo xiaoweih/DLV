@@ -45,7 +45,9 @@ def main():
         print "\n\nprocessing input of index %s in the dataset: " %(str(startIndexOfImage))
         if task == "safety_check": 
             handleOne(model,dc,startIndexOfImage)
-    dc.summarise()
+    if dataProcessing == "batch": 
+        dc.provideDetails()
+        dc.summarise()
     dc.close()
       
 ###########################################################################
@@ -57,7 +59,6 @@ def main():
 
 def handleOne(model,dc,startIndexOfImage):
 
-    # ce: the region definition for layer 0, i.e., e_0
     # get an image to interpolate
     global np
     image = NN.getImage(model,startIndexOfImage)
@@ -158,7 +159,7 @@ def handleOne(model,dc,startIndexOfImage):
                         if len(diffs) == 0: st.clearManipulated(k)
                         st.addImages(model,rk)
                         st.removeProcessed(imageIndex)
-                        (re,percent) = reportInfo(image,rs,wk,numDimsToMani,howfar,image0)
+                        (re,percent,eudist) = reportInfo(image,rs,wk,numDimsToMani,howfar,image0)
                         break
                     else: 
                         print "3) add new intermediate node ..."
@@ -167,17 +168,20 @@ def handleOne(model,dc,startIndexOfImage):
                         t += 1
                 if re == True: 
                     dc.addManipulationPercentage(percent)
+                    dc.addEuclideanDistance(eudist)
                     (ocl,ocf) = NN.predictWithImage(model,rk[0])
                     dc.addConfidence(ocf)
                     break
                 
             st.destructor()
-        k += 1    
-     
+            
         runningTime = time.time() - start_time   
         dc.addRunningTime(runningTime)
-        
-    dc.outputOneSample()
+        if re == True and exitWhen == "foundFirst": 
+            break
+        k += 1    
+     
+    print("Please refer to the file %s for statistics."%(dc.fileName))
     
 
 def reportInfo(image,rs,wk,numDimsToMani,howfar,image0):
@@ -185,10 +189,11 @@ def reportInfo(image,rs,wk,numDimsToMani,howfar,image0):
     # exit only when we find an adversarial example
     if wk == []:    
         print "no adversarial example is found in this layer."  
-        return (False,0)
+        return (False,0,0)
     else: 
         print "an adversarial example has been found."
         diffs = diffImage(image,image0)
+        eudist = euclideanDistance(image,image0)
         elts = len(diffs.keys())
         if len(image0.shape) == 2: 
             percent = elts / float(len(image0)*len(image0[0]))
@@ -196,7 +201,7 @@ def reportInfo(image,rs,wk,numDimsToMani,howfar,image0):
             percent = elts / float(len(image0))
         elif len(image0.shape) == 3:
             percent = elts / float(len(image0)*len(image0[0])*len(image0[0][0]))
-        return (True,percent)
+        return (True,percent,eudist)
         
 if __name__ == "__main__":
 
