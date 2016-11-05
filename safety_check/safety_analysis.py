@@ -15,13 +15,13 @@ import matplotlib.pyplot as plt
 from scipy import ndimage
 
 from conv_safety_solve import conv_safety_solve
-from conv_adversarial_solve import conv_adversarial_solve
-from dense_adversarial_solve import dense_adversarial_solve
+#from conv_adversarial_solve import conv_adversarial_solve
+#from dense_adversarial_solve import dense_adversarial_solve
 from dense_safety_solve import dense_safety_solve
 from flatten_safety_solve import flatten_safety_solve
 from maxpooling_safety_solve import maxpooling_safety_solve
 
-import conv_bp
+#import conv_bp
 import relu
 
 from basics import *
